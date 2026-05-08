@@ -1,0 +1,100 @@
+{
+  "project_name": "CorteQS Intelligence Engine",
+  "app_type": "dashboard",
+  "theme": "light",
+  "archetype": "4_swiss_high_contrast",
+  "emotion_and_vibe": "Authority, Clarity, Truth, Objective, Functional",
+  "design_philosophy": "Swiss & High-Contrast. Strict grid hierarchy, pure functional beauty. Color is function only. 95% monochrome UI, with vibrant accents guiding action.",
+  "colors": {
+    "background_base": "#F4F4F5",
+    "surface": "#FFFFFF",
+    "surface_secondary": "#FAFAFA",
+    "primary": "#002FA7",
+    "primary_hover": "#00227A",
+    "accent_red": "#FF3B30",
+    "accent_yellow": "#FFCC00",
+    "text_high_contrast": "#09090B",
+    "text_medium": "#52525B",
+    "text_muted": "#A1A1AA",
+    "border_subtle": "#E4E4E7",
+    "border_focus": "#002FA7"
+  },
+  "typography": {
+    "primary_font": "Cabinet Grotesk",
+    "secondary_font": "IBM Plex Sans",
+    "scale": {
+      "h1": "text-4xl sm:text-5xl font-black tracking-tighter leading-none",
+      "h2": "text-2xl sm:text-3xl font-bold tracking-tight leading-tight",
+      "h3": "text-xl sm:text-2xl font-bold tracking-tight",
+      "h4": "text-lg sm:text-xl font-medium tracking-tight",
+      "body": "text-base font-normal leading-relaxed text-zinc-800",
+      "small": "text-sm font-medium",
+      "overline": "text-xs font-bold uppercase tracking-[0.2em] text-zinc-500"
+    }
+  },
+  "spacing_and_layout": {
+    "philosophy": "Strict grid hierarchy. Generous padding inside containers, tight gaps between widgets.",
+    "container_padding": "p-6 sm:p-8",
+    "grid_gap": "gap-4 sm:gap-6",
+    "dashboard_grid": "grid-cols-1 md:grid-cols-3 lg:grid-cols-4",
+    "sidebar_width": "w-64",
+    "radius": "rounded-md",
+    "surface_strategy": "Grid Borders (The 'Technical' Look). Use 1px subtle borders (border-zinc-200) on cards. No heavy shadows, use sharp edges or max 8px radius. Flat backgrounds."
+  },
+  "components": {
+    "navigation": {
+      "type": "collapsible_sidebar",
+      "style": "Solid background (white) with right border (1px solid border-zinc-200). Active links highlighted with primary blue left border.",
+      "header": "Sticky top bar, z-50, backdrop-blur-xl bg-white/70, bottom border."
+    },
+    "cards": {
+      "style": "bg-white border border-zinc-200 rounded-md shadow-sm. Hover: -translate-y-[1px] shadow-md border-zinc-300 transition-all duration-200."
+    },
+    "buttons": {
+      "primary": "bg-[#002FA7] text-white rounded-md px-4 py-2 font-medium hover:bg-[#00227A] transition-colors focus:ring-2 focus:ring-[#002FA7]/50",
+      "secondary": "bg-white text-zinc-900 border border-zinc-200 rounded-md px-4 py-2 font-medium hover:bg-zinc-50 transition-colors",
+      "ghost": "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-md px-4 py-2 transition-colors"
+    },
+    "data_visualization": {
+      "charts": "Shadcn Recharts components. Use mono-color (primary blue) for lines/bars unless indicating status (red/yellow).",
+      "knowledge_graph": "Use React Force Graph 3D or similar for visual network map, set transparent background to blend with white card surface, nodes in primary blue and dark grey."
+    },
+    "interactive_elements": {
+      "shadcn_usage": "Extensively use Shadcn UI (Tabs, Dialogs, Select, Tables, Dropdown Menu). Customize radius to 'rounded-md' and replace default focus rings with primary blue."
+    }
+  },
+  "animations": {
+    "hover_states": "transition-all duration-200 ease-in-out",
+    "entrance": "staggered fade-in-up (framer-motion) for list items and cards",
+    "page_transition": "opacity fade"
+  },
+  "icons_and_assets": {
+    "icon_library": "@phosphor-icons/react (Duotone or Regular weight)",
+    "image_urls": [
+      {
+        "category": "knowledge_graph_background",
+        "description": "Abstract black and white network nodes, used for hero/login area or empty states in graph visualization.",
+        "url": "https://images.unsplash.com/photo-1683447551794-1c287cd42675?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMG5ldHdvcmslMjBub2RlJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NzgyMzMzOTR8MA&ixlib=rb-4.1.0&q=85"
+      },
+      {
+        "category": "user_avatar",
+        "description": "Professional corporate avatar for user profile dropdown.",
+        "url": "https://images.unsplash.com/photo-1718783573640-c5b01c37bf58?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1MDV8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBjb3Jwb3JhdGUlMjBhdmF0YXJ8ZW58MHx8fHwxNzc4MjMzMzk0fDA&ixlib=rb-4.1.0&q=85"
+      }
+    ]
+  },
+  "accessibility_and_testing": {
+    "contrast": "Ensure minimum 4.5:1 ratio for text. Text on primary blue must be pure white.",
+    "testing_attributes": "All interactive elements MUST include `data-testid` (e.g., `data-testid=\"sidebar-nav-link\"`)."
+  },
+  "instructions_to_main_agent": [
+    "Build the dashboard using React, Tailwind CSS, and Shadcn UI primitives.",
+    "Follow the layout strictly: A collapsible left sidebar + a top header + main content area.",
+    "Use the exact fonts: Cabinet Grotesk for Headings, IBM Plex Sans for body text.",
+    "Implement the 'Control Room' grid layout for the Analytics Dashboard: dense data, 1px borders, white cards on very light grey background.",
+    "For the Knowledge Graph visualization, implement a placeholder canvas or utilize an actual charting library (like react-force-graph if possible) mimicking network nodes.",
+    "For the Data Source Connectors Panel, use grid layout showing tiles of tools (Slack, GitHub, Drive, WhatsApp, Email) with Phosphor Icons and connection status toggles.",
+    "Use the provided image URLs for the user profile and decorative backgrounds where applicable.",
+    "Ensure all interactive elements have hover and focus states defined in guidelines."
+  ]
+}
