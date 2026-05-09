@@ -47,22 +47,25 @@ class SlackService:
         channel_id: str, 
         limit: int = 100,
         oldest: Optional[str] = None,
-        latest: Optional[str] = None
+        latest: Optional[str] = None,
+        auto_join: bool = True
     ) -> List[Dict[str, Any]]:
-        """Get messages from a specific channel"""
+        """Get messages from a specific channel.
+
+        If the bot is not in the channel and `auto_join` is True, it will try
+        to join the channel automatically (requires `channels:join` scope).
+        """
         if not self.is_configured:
             return []
-        
-        try:
+
+        def _fetch():
             params = {"channel": channel_id, "limit": limit}
             if oldest:
                 params["oldest"] = oldest
             if latest:
                 params["latest"] = latest
-            
             response = self.client.conversations_history(**params)
             messages = []
-            
             for msg in response.get("messages", []):
                 messages.append({
                     "ts": msg.get("ts"),
@@ -73,14 +76,25 @@ class SlackService:
                     "reply_count": msg.get("reply_count", 0),
                     "reactions": msg.get("reactions", []),
                     "timestamp": datetime.fromtimestamp(
-                        float(msg.get("ts", 0)), 
+                        float(msg.get("ts", 0)),
                         tz=timezone.utc
                     ).isoformat()
                 })
-            
             return messages
+
+        try:
+            return _fetch()
         except SlackApiError as e:
-            print(f"Slack API Error: {e.response['error']}")
+            err = e.response.get("error")
+            # Auto-join if the bot is not yet a member of the channel
+            if err == "not_in_channel" and auto_join:
+                try:
+                    self.client.conversations_join(channel=channel_id)
+                    return _fetch()
+                except SlackApiError as join_err:
+                    print(f"Slack auto-join failed for {channel_id}: {join_err.response.get('error')}")
+                    return []
+            print(f"Slack API Error ({channel_id}): {err}")
             return []
     
     def get_users(self, limit: int = 200) -> List[Dict[str, Any]]:
