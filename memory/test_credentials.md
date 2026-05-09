@@ -47,12 +47,16 @@ curl -X GET "$API_URL/api/auth/me" -H "Authorization: Bearer test_session_corteq
 - **Database**: neo4j
 - **User**: neo4j
 
+### Google Drive
+- **Status**: ✅ Connected
+- **Service Account**: corteqs-drive-sync@gen-lang-client-0322325978.iam.gserviceaccount.com
+- **Note**: Share files/folders with service account email to enable sync
+
 ### Elasticsearch Cloud
 - **Status**: ✅ Connected
 - **Cluster**: adb1c0a104f444d5aa0a2c163e0012f4
 - **Version**: 9.4.0
-- **Cloud ID**: 0d6ca21a928f46d1b14c847298fa37c1:dXMt...
-- **Documents Indexed**: 10 (GitHub repos)
+- **Documents Indexed**: 11
 
 ## AI Integration
 - **Provider**: Gemini (via Emergent LLM Key)
