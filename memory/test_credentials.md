@@ -26,7 +26,29 @@ curl -X GET "$API_URL/api/auth/me" -H "Authorization: Bearer test_session_corteq
 
 ## Database
 - **Database**: corteqs_engine
-- **Collections**: users, user_sessions, data_sources, knowledge_nodes, chat_messages, activities
+- **Collections**: users, user_sessions, data_sources, knowledge_nodes, chat_messages, activities, documents
+
+## Connected Services (v2.0)
+
+### Slack
+- **Workspace**: CorteQS
+- **Team ID**: T0B3CRXTQD6
+- **Bot User**: corteqssocial
+- **Token Type**: xoxe (user token)
+
+### GitHub
+- **User**: @ubterzioglu
+- **Repos**: 67 total
+- **Token Type**: Fine-grained PAT
+
+### Neo4j Aura
+- **Instance**: corteqs
+- **URI**: neo4j+s://2874d84c.databases.neo4j.io
+- **Database**: neo4j
+- **User**: neo4j
+
+### Elasticsearch (Pending)
+- **Status**: Awaiting credentials
 
 ## AI Integration
 - **Provider**: Gemini (via Emergent LLM Key)

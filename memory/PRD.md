@@ -6,19 +6,25 @@ Build CorteQS Intelligence Engine - A comprehensive Corporate Memory and AI-powe
 ## User Choices
 - **Scope**: Full-scale development with all modules
 - **AI/LLM**: Gemini 3 Pro (using Emergent LLM Key)
-- **Databases**: Neo4j + MongoDB + Elasticsearch (currently MongoDB implemented)
+- **Databases**: Neo4j (cloud) + MongoDB + Elasticsearch (pending)
 - **Authentication**: Google OAuth via Emergent Auth
+- **Real Integrations**: Slack, GitHub (LIVE)
 
-## Architecture
+## Architecture v2.0
 ```
 Frontend (React + Tailwind)
     │
     ├── Login (Google OAuth)
-    ├── Dashboard (Overview)
-    ├── Data Sources (Connectors)
-    ├── Knowledge Graph (Visualization)
+    ├── Dashboard (Overview + Stats)
+    ├── Data Sources (Live Integrations Panel)
+    │   ├── Slack (LIVE - connected)
+    │   ├── GitHub (LIVE - connected)
+    │   ├── Neo4j Status
+    │   └── Elasticsearch Status
+    ├── Knowledge Graph (Neo4j visualization)
     ├── AI Chat (Gemini-powered Q&A)
-    └── Analytics (Metrics)
+    ├── Analytics (Metrics + Distribution)
+    └── Document Upload (AI extraction)
     │
 Backend (FastAPI + Motor)
     │
@@ -26,73 +32,70 @@ Backend (FastAPI + Motor)
     ├── Data Source APIs (/api/data-sources/*)
     ├── Knowledge APIs (/api/knowledge/*)
     ├── Chat APIs (/api/chat/*)
-    ├── Search APIs (/api/search)
-    └── Analytics APIs (/api/analytics/*)
+    ├── Search APIs (/api/search/*)
+    ├── Analytics APIs (/api/analytics/*)
+    ├── Integration APIs (/api/integrations/*)
+    │   ├── Slack sync
+    │   ├── GitHub sync
+    │   └── Status checks
+    ├── Neo4j APIs (/api/neo4j/*)
+    ├── Elasticsearch APIs (/api/elasticsearch/*)
+    └── Document APIs (/api/documents/*)
     │
-Database (MongoDB)
+Databases
     │
-    ├── users
-    ├── user_sessions
-    ├── data_sources
-    ├── knowledge_nodes
-    ├── chat_messages
-    └── activities
+    ├── MongoDB (users, sessions, activities, documents)
+    ├── Neo4j Aura (Knowledge Graph nodes & edges)
+    └── Elasticsearch Cloud (Full-text search - pending)
 ```
 
-## Core Requirements (Static)
-1. ✅ User Authentication (Google OAuth)
-2. ✅ Data Source Management (CRUD operations)
-3. ✅ Knowledge Graph (Nodes, connections, visualization)
-4. ✅ AI Q&A System (Gemini integration)
-5. ✅ Analytics Dashboard (Statistics, activity tracking)
-6. ✅ Search Functionality
-
 ## What's Been Implemented
-**Date: 2026-05-08**
+
+**Date: 2026-05-08 (v1.0)**
 - Full backend API with 16 endpoints
 - Complete frontend with 5 main pages
-- Google OAuth authentication via Emergent Auth
-- Data source connector system (Slack, GitHub, GDrive, Email, WhatsApp)
-- Knowledge graph with node CRUD and visualization
+- Google OAuth authentication
+- Data source connector system
+- Knowledge graph with MongoDB
 - AI chat powered by Gemini 2.5 Pro
-- Analytics dashboard with statistics
-- Activity logging system
-- Swiss/High-contrast UI design
+- Analytics dashboard
 
-## User Personas
-1. **Corporate Manager**: Uses dashboard for overview, AI chat for quick insights
-2. **Data Analyst**: Uses knowledge graph and analytics for deep analysis
-3. **IT Admin**: Manages data source connections and integrations
+**Date: 2026-05-09 (v2.0)**
+- ✅ Real Slack API integration (channels, users, messages)
+- ✅ Real GitHub API integration (repos, issues, PRs, contributors)
+- ✅ Neo4j Aura cloud database for Knowledge Graph
+- ✅ Data sync from Slack/GitHub to Neo4j
+- ✅ Document upload with AI-powered extraction
+- ✅ Live integrations panel in frontend
+- ⏳ Elasticsearch (awaiting credentials)
+- ⏳ Google Drive integration (awaiting credentials)
 
 ## Prioritized Backlog
 
 ### P0 - Critical (Next Sprint)
-- [ ] Real data source integrations (actual Slack/GitHub/GDrive APIs)
-- [ ] Neo4j integration for proper graph database
-- [ ] Elasticsearch for full-text search
-- [ ] Vector embeddings for semantic search
+- [x] Real Slack API integration
+- [x] Real GitHub API integration
+- [x] Neo4j graph database
+- [ ] Elasticsearch full-text search (credentials needed)
+- [ ] Google Drive integration (credentials needed)
 
 ### P1 - High Priority
-- [ ] Real-time data sync from connected sources
-- [ ] Advanced knowledge graph algorithms (PageRank, clustering)
+- [ ] Real-time webhooks for Slack/GitHub
+- [ ] Advanced graph algorithms (PageRank)
+- [ ] Vector embeddings for semantic search
 - [ ] Export/import functionality
-- [ ] Role-based access control (RBAC)
 
 ### P2 - Medium Priority
 - [ ] Recommendation engine
-- [ ] Automated knowledge extraction from documents
 - [ ] Financial dashboard integration
 - [ ] Custom report generation
+- [ ] RBAC (role-based access control)
 
-### P3 - Low Priority
-- [ ] Mobile responsive improvements
-- [ ] Webhook integrations
-- [ ] API rate limiting
-- [ ] Audit logging
-
-## Next Tasks
-1. Integrate real Slack API for data source connection
-2. Add Neo4j for graph database operations
-3. Implement Elasticsearch for search
-4. Add document upload and processing
-5. Create recommendation engine
+## Connected Services
+| Service | Status | Details |
+|---------|--------|---------|
+| Slack | ✅ Connected | CorteQS workspace |
+| GitHub | ✅ Connected | @ubterzioglu (67 repos) |
+| Neo4j | ✅ Connected | Aura cloud (corteqs) |
+| Elasticsearch | ⏳ Pending | Awaiting credentials |
+| Google Drive | ⏳ Pending | Awaiting credentials |
