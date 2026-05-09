@@ -1,0 +1,38 @@
+{
+  "summary": "Backend regression run for the MongoDB → Supabase migration. Created /app/backend/tests/test_supabase_migration.py with 35 pytest cases covering health, auth, analytics, knowledge graph CRUD + connections, search (Postgres ilike), chat (Gemini via Emergent LLM Key) + history + clear, data sources CRUD, integrations (Slack/GitHub/GDrive test + sync with upsert), Neo4j (status/stats/graph), Elasticsearch (status/full search/autocomplete/stats), activities, and document upload + list + get. All 35 tests passed against the public REACT_APP_BACKEND_URL. Verified no motor/pymongo imports remain anywhere under /app/backend. Health endpoint correctly returns version=2.1.0 and database=supabase. Knowledge node connection writes are persisted to the JSONB connections column and graph edges are derived correctly. Slack and GDrive sync endpoints return 200 and upsert a data_sources row keyed on (user_id, source_type). Chat round-trip persists both user + assistant messages to chat_messages and history is returned chronologically. Document upload writes to documents table, creates a knowledge node, and returns AI extraction.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/integrations/github/sync (background)", "issue": "Repeated 'list index out of range' errors logged from github_service while syncing repos with no issues/PRs. Pre-existing, not caused by Supabase migration. Should add bounds check in services/github_service.py."},
+      {"endpoint": "/api/integrations/slack/*", "issue": "Slack token returns missing_scope for some scopes — pre-existing token scope issue, unrelated to DB migration."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_supabase_migration.py",
+    "/app/test_reports/pytest/iteration_5.xml"
+  ],
+  "action_items": [
+    "(Optional) Harden services/github_service.py by guarding list[0] accesses to silence 'list index out of range' on empty repos.",
+    "(Optional) Refresh Slack token with required scopes if Slack sync is to actually sync messages/users."
+  ],
+  "critical_code_review_comments": [
+    "server.py is ~955 lines — past the recommended 700 line threshold; consider splitting into routers (auth, knowledge, chat, data_sources, integrations, documents).",
+    "/api/auth/session sets cookie with samesite='none' and secure=True — fine for prod over HTTPS but won't work over plain http; document this.",
+    "user_sessions upsert uses on_conflict='user_id' which means each user has only one active session; OK for current single-device scope but may break multi-device login later.",
+    "knowledge_nodes.connections is a JSONB array updated via read-modify-write — race-prone under concurrent connect calls. Acceptable for MVP; consider a separate edges table or RPC with array_append for atomicity.",
+    "/api/documents/upload and /api/chat import emergentintegrations inside the function on every call — minor perf cost, prefer module-level import.",
+    "search_knowledge passes user-provided query directly into a PostgREST .or_ filter string; supabase-py escapes commas but special chars like ',' or ')' in query could mis-parse. Add basic sanitisation.",
+    "CORS allow_origins=['*'] with allow_credentials=True is technically invalid per spec; browsers ignore credentials in this case. Replace '*' with the actual frontend URL."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_supabase_migration.py"
+  ],
+  "success_rate": {"backend": "100% (35/35)", "frontend": "not tested (per request)"},
+  "test_credentials": "Bearer test_session_corteqs (user_test123456 / test@corteqs.com) — confirmed working against Supabase.",
+  "seed_data_creation": "Tests create TEST_-prefixed knowledge nodes, a TEST_DS data source (deleted in same suite), one chat round (cleared at start), and one uploaded .txt document. No production data touched.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Use /app/backend/tests/test_supabase_migration.py as the regression suite. It is hot-reload safe and hits the public REACT_APP_BACKEND_URL with the seeded session token. The Supabase migration is verified end-to-end: health reports database=supabase v2.1.0, all CRUD operations persist (verified via follow-up GETs), knowledge graph edges are derived from the JSONB connections column, chat messages persist to chat_messages and chat/history returns them in chronological order, and Slack/GitHub/GDrive sync endpoints upsert into data_sources on (user_id, source_type). No motor/pymongo imports remain. Pre-existing non-blockers: Slack missing_scope and GitHub 'list index out of range' from services — unrelated to the DB migration.",
+  "rca of the issue": "N/A — no failing tests. Migration verified stable."
+}
