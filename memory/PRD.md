@@ -93,6 +93,15 @@ Databases
 - ✅ Live test: 195 files + 85 folders synced at depth=2 (vs 57+43 at root only)
 - ✅ Neo4j: 204 total nodes (10 projects, 144 documents, 7 persons, 43 topics)
 
+**Date: 2026-02-09 (v2.3) — Backend Refactor + Slack Messages**
+- ✅ `server.py` reduced from ~990 to **71 lines** (entry point only)
+- ✅ Endpoints split across `/app/backend/routes/`: `auth`, `data_sources`, `knowledge`, `chat`, `search`, `analytics`, `integrations`, `graph`, `documents`, `health`
+- ✅ Shared `models.py` (Pydantic) + `dependencies.py` (auth + activity logging)
+- ✅ Slack token refreshed with `channels:read`, `channels:history`, `channels:join`, `users:read`, `users:read.email` scopes
+- ✅ `slack_service.get_channel_messages` now auto-joins channels on `not_in_channel` (uses `channels:join`) and retries
+- ✅ Slack sync now successfully fetches channel messages (verified: 6 messages persisted to Neo4j + Elasticsearch)
+- ✅ 35/35 backend regression tests still pass after refactor
+
 ## Prioritized Backlog
 
 ### P0 - Critical (Next Sprint)
@@ -105,11 +114,11 @@ Databases
 
 ### P1 - High Priority
 - [x] Recursive sync for Google Drive subfolders
-- [ ] Sync Slack channel messages (needs channels:history scope)
+- [x] Sync Slack channel messages (with auto-join)
+- [x] Split server.py into routers/* modules
 - [ ] Real-time webhooks for Slack/GitHub
 - [ ] Advanced graph algorithms (PageRank)
 - [ ] Vector embeddings for semantic search
-- [ ] Split server.py (~955 lines) into routers/* modules
 - [ ] Replace knowledge_nodes.connections JSONB read-modify-write with separate edges table or RPC for atomicity
 
 ### P2 - Medium Priority
