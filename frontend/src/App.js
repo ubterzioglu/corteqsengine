@@ -512,34 +512,60 @@ const DashboardPage = () => {
 // ==================== DATA SOURCES PAGE ====================
 const DataSourcesPage = () => {
   const [sources, setSources] = useState([]);
+  const [integrationStatus, setIntegrationStatus] = useState({});
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState({});
   const [showAddModal, setShowAddModal] = useState(false);
 
   const sourceTypes = [
-    { type: 'slack', name: 'Slack', icon: SlackLogo, color: 'bg-purple-500' },
-    { type: 'github', name: 'GitHub', icon: GithubLogo, color: 'bg-zinc-800' },
-    { type: 'gdrive', name: 'Google Drive', icon: GoogleDriveLogo, color: 'bg-yellow-500' },
-    { type: 'email', name: 'Email', icon: Envelope, color: 'bg-blue-500' },
-    { type: 'whatsapp', name: 'WhatsApp', icon: WhatsappLogo, color: 'bg-green-500' },
+    { type: 'slack', name: 'Slack', icon: SlackLogo, color: 'bg-purple-500', hasRealIntegration: true },
+    { type: 'github', name: 'GitHub', icon: GithubLogo, color: 'bg-zinc-800', hasRealIntegration: true },
+    { type: 'gdrive', name: 'Google Drive', icon: GoogleDriveLogo, color: 'bg-yellow-500', hasRealIntegration: false },
+    { type: 'email', name: 'Email', icon: Envelope, color: 'bg-blue-500', hasRealIntegration: false },
+    { type: 'whatsapp', name: 'WhatsApp', icon: WhatsappLogo, color: 'bg-green-500', hasRealIntegration: false },
   ];
 
   useEffect(() => {
-    fetchSources();
+    fetchData();
   }, []);
 
-  const fetchSources = async () => {
+  const fetchData = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/data-sources`, {
+      // Fetch sources and integration status in parallel
+      const [sourcesRes, statusRes] = await Promise.all([
+        fetch(`${API_URL}/api/data-sources`, { credentials: 'include' }),
+        fetch(`${API_URL}/api/integrations/status`, { credentials: 'include' })
+      ]);
+      
+      if (sourcesRes.ok) {
+        setSources(await sourcesRes.json());
+      }
+      if (statusRes.ok) {
+        setIntegrationStatus(await statusRes.json());
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const syncSource = async (sourceType) => {
+    setSyncing(prev => ({ ...prev, [sourceType]: true }));
+    try {
+      const response = await fetch(`${API_URL}/api/integrations/${sourceType}/sync`, {
+        method: 'POST',
         credentials: 'include'
       });
       if (response.ok) {
-        const data = await response.json();
-        setSources(data);
+        const result = await response.json();
+        alert(`Sync complete! ${JSON.stringify(result.stats)}`);
+        fetchData();
       }
     } catch (error) {
-      console.error('Error fetching sources:', error);
+      console.error('Error syncing:', error);
     } finally {
-      setLoading(false);
+      setSyncing(prev => ({ ...prev, [sourceType]: false }));
     }
   };
 
@@ -552,7 +578,7 @@ const DataSourcesPage = () => {
         body: JSON.stringify({ source_type: sourceType, name })
       });
       if (response.ok) {
-        fetchSources();
+        fetchData();
         setShowAddModal(false);
       }
     } catch (error) {
@@ -567,7 +593,7 @@ const DataSourcesPage = () => {
         method: 'PUT',
         credentials: 'include'
       });
-      fetchSources();
+      fetchData();
     } catch (error) {
       console.error('Error toggling connection:', error);
     }
@@ -579,7 +605,7 @@ const DataSourcesPage = () => {
         method: 'DELETE',
         credentials: 'include'
       });
-      fetchSources();
+      fetchData();
     } catch (error) {
       console.error('Error deleting source:', error);
     }
@@ -607,6 +633,110 @@ const DataSourcesPage = () => {
         </button>
       </div>
 
+      {/* Real-time Integration Status */}
+      <div className="mb-8">
+        <h3 className="font-display text-lg font-bold mb-4">Live Integrations</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Slack Integration */}
+          <div className="bg-white border border-zinc-200 rounded-md p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-md bg-purple-500 flex items-center justify-center">
+                  <SlackLogo size={20} weight="fill" className="text-white" />
+                </div>
+                <div>
+                  <p className="font-medium">Slack</p>
+                  <div className="flex items-center gap-1">
+                    <span className={`w-2 h-2 rounded-full ${integrationStatus.slack?.connected ? 'bg-emerald-500' : 'bg-zinc-300'}`} />
+                    <span className="text-xs text-zinc-500">
+                      {integrationStatus.slack?.connected ? integrationStatus.slack.team : 'Not connected'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {integrationStatus.slack?.connected && (
+              <button
+                data-testid="sync-slack-btn"
+                onClick={() => syncSource('slack')}
+                disabled={syncing.slack}
+                className="w-full flex items-center justify-center gap-2 bg-purple-50 text-purple-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-purple-100 transition-colors disabled:opacity-50"
+              >
+                {syncing.slack ? <Spinner size={16} className="animate-spin" /> : <ArrowsClockwise size={16} />}
+                {syncing.slack ? 'Syncing...' : 'Sync Data'}
+              </button>
+            )}
+          </div>
+
+          {/* GitHub Integration */}
+          <div className="bg-white border border-zinc-200 rounded-md p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-md bg-zinc-800 flex items-center justify-center">
+                  <GithubLogo size={20} weight="fill" className="text-white" />
+                </div>
+                <div>
+                  <p className="font-medium">GitHub</p>
+                  <div className="flex items-center gap-1">
+                    <span className={`w-2 h-2 rounded-full ${integrationStatus.github?.connected ? 'bg-emerald-500' : 'bg-zinc-300'}`} />
+                    <span className="text-xs text-zinc-500">
+                      {integrationStatus.github?.connected ? `@${integrationStatus.github.login}` : 'Not connected'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {integrationStatus.github?.connected && (
+              <button
+                data-testid="sync-github-btn"
+                onClick={() => syncSource('github')}
+                disabled={syncing.github}
+                className="w-full flex items-center justify-center gap-2 bg-zinc-100 text-zinc-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-zinc-200 transition-colors disabled:opacity-50"
+              >
+                {syncing.github ? <Spinner size={16} className="animate-spin" /> : <ArrowsClockwise size={16} />}
+                {syncing.github ? 'Syncing...' : 'Sync Repos'}
+              </button>
+            )}
+          </div>
+
+          {/* Neo4j Status */}
+          <div className="bg-white border border-zinc-200 rounded-md p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-md bg-blue-600 flex items-center justify-center">
+                <Graph size={20} weight="fill" className="text-white" />
+              </div>
+              <div>
+                <p className="font-medium">Neo4j</p>
+                <div className="flex items-center gap-1">
+                  <span className={`w-2 h-2 rounded-full ${integrationStatus.neo4j?.connected ? 'bg-emerald-500' : 'bg-zinc-300'}`} />
+                  <span className="text-xs text-zinc-500">
+                    {integrationStatus.neo4j?.connected ? 'Graph DB Active' : 'Not connected'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Elasticsearch Status */}
+          <div className="bg-white border border-zinc-200 rounded-md p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-md bg-amber-500 flex items-center justify-center">
+                <MagnifyingGlass size={20} weight="fill" className="text-white" />
+              </div>
+              <div>
+                <p className="font-medium">Elasticsearch</p>
+                <div className="flex items-center gap-1">
+                  <span className={`w-2 h-2 rounded-full ${integrationStatus.elasticsearch?.connected ? 'bg-emerald-500' : 'bg-zinc-300'}`} />
+                  <span className="text-xs text-zinc-500">
+                    {integrationStatus.elasticsearch?.connected ? 'Search Active' : 'Not configured'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Available Connectors */}
       <div className="mb-8">
         <h3 className="font-display text-lg font-bold mb-4">Available Connectors</h3>
@@ -619,8 +749,11 @@ const DataSourcesPage = () => {
                 const name = prompt(`Enter name for ${source.name} connection:`);
                 if (name) addSource(source.type, name);
               }}
-              className="bg-white border border-zinc-200 rounded-md p-6 text-center card-hover"
+              className="bg-white border border-zinc-200 rounded-md p-6 text-center card-hover relative"
             >
+              {source.hasRealIntegration && (
+                <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded">LIVE</span>
+              )}
               <div className={`w-12 h-12 mx-auto mb-3 rounded-md flex items-center justify-center ${source.color}`}>
                 <source.icon size={24} weight="fill" className="text-white" />
               </div>

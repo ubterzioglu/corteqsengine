@@ -311,6 +311,228 @@ class CorteQSAPITester:
         )
         return success
 
+    # ==================== V2.0 INTEGRATION TESTS ====================
+    
+    def test_integration_status(self):
+        """Test integration status endpoint"""
+        success, response = self.run_test(
+            "Get Integration Status",
+            "GET",
+            "/api/integrations/status",
+            200,
+            check_response=lambda r: 'slack' in r and 'github' in r and 'neo4j' in r
+        )
+        return success, response
+    
+    def test_slack_connection(self):
+        """Test Slack connection endpoint"""
+        success, response = self.run_test(
+            "Test Slack Connection",
+            "GET",
+            "/api/integrations/slack/test",
+            200,
+            check_response=lambda r: 'connected' in r
+        )
+        return success, response
+    
+    def test_github_connection(self):
+        """Test GitHub connection endpoint"""
+        success, response = self.run_test(
+            "Test GitHub Connection",
+            "GET",
+            "/api/integrations/github/test",
+            200,
+            check_response=lambda r: 'connected' in r
+        )
+        return success, response
+    
+    def test_neo4j_status(self):
+        """Test Neo4j status endpoint"""
+        success, response = self.run_test(
+            "Test Neo4j Status",
+            "GET",
+            "/api/neo4j/status",
+            200,
+            check_response=lambda r: 'connected' in r
+        )
+        return success, response
+    
+    def test_elasticsearch_status(self):
+        """Test Elasticsearch status endpoint"""
+        success, response = self.run_test(
+            "Test Elasticsearch Status",
+            "GET",
+            "/api/elasticsearch/status",
+            200,
+            check_response=lambda r: 'connected' in r
+        )
+        return success, response
+    
+    def test_slack_sync(self):
+        """Test Slack data sync endpoint"""
+        success, response = self.run_test(
+            "Sync Slack Data",
+            "POST",
+            "/api/integrations/slack/sync",
+            200,
+            check_response=lambda r: 'success' in r
+        )
+        return success, response
+    
+    def test_github_sync(self):
+        """Test GitHub data sync endpoint"""
+        # GitHub sync can take longer due to many repos
+        url = f"{self.base_url}/api/integrations/github/sync"
+        self.tests_run += 1
+        print(f"\n🔍 Testing Sync GitHub Data...")
+        print(f"   URL: {url}")
+        print(f"   Note: This may take longer due to multiple repositories...")
+        
+        try:
+            response = requests.post(
+                url, 
+                headers=self.headers,
+                timeout=90  # Increased timeout for GitHub sync
+            )
+            
+            print(f"   Status: {response.status_code}")
+            
+            success = response.status_code == 200
+            
+            if success:
+                response_data = response.json()
+                if 'success' in response_data:
+                    self.tests_passed += 1
+                    print(f"✅ Passed")
+                    return True, response_data
+                else:
+                    print(f"❌ Failed - Invalid response structure")
+                    self.failed_tests.append({
+                        'name': 'Sync GitHub Data',
+                        'endpoint': '/api/integrations/github/sync',
+                        'reason': 'Invalid response structure',
+                        'status': response.status_code
+                    })
+                    return False, {}
+            else:
+                print(f"❌ Failed - Expected 200, got {response.status_code}")
+                self.failed_tests.append({
+                    'name': 'Sync GitHub Data',
+                    'endpoint': '/api/integrations/github/sync',
+                    'reason': f'Expected 200, got {response.status_code}',
+                    'status': response.status_code
+                })
+                return False, {}
+                
+        except requests.exceptions.Timeout:
+            print(f"❌ Failed - Request timeout (>90s)")
+            self.failed_tests.append({
+                'name': 'Sync GitHub Data',
+                'endpoint': '/api/integrations/github/sync',
+                'reason': 'Request timeout (>90s) - too many repositories',
+                'status': 'timeout'
+            })
+            return False, {}
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            self.failed_tests.append({
+                'name': 'Sync GitHub Data',
+                'endpoint': '/api/integrations/github/sync',
+                'reason': f'Error: {str(e)}',
+                'status': 'error'
+            })
+            return False, {}
+    
+    def test_document_upload(self):
+        """Test document upload endpoint"""
+        import io
+        # Create a simple text file
+        file_content = "This is a test document for CorteQS Intelligence Engine.\nIt contains sample text for AI extraction."
+        
+        # Use requests with files parameter
+        url = f"{self.base_url}/api/documents/upload"
+        files = {'file': ('test_document.txt', io.BytesIO(file_content.encode()), 'text/plain')}
+        
+        self.tests_run += 1
+        print(f"\n🔍 Testing Document Upload...")
+        print(f"   URL: {url}")
+        
+        try:
+            response = requests.post(
+                url, 
+                files=files, 
+                headers={'Authorization': f'Bearer {self.session_token}'},
+                timeout=30  # Longer timeout for AI extraction
+            )
+            
+            print(f"   Status: {response.status_code}")
+            
+            success = response.status_code == 200
+            
+            if success:
+                response_data = response.json()
+                if 'document' in response_data and 'knowledge_node_id' in response_data:
+                    self.tests_passed += 1
+                    print(f"✅ Passed")
+                    return True, response_data
+                else:
+                    print(f"❌ Failed - Invalid response structure")
+                    self.failed_tests.append({
+                        'name': 'Document Upload',
+                        'endpoint': '/api/documents/upload',
+                        'reason': 'Invalid response structure',
+                        'status': response.status_code
+                    })
+                    return False, {}
+            else:
+                print(f"❌ Failed - Expected 200, got {response.status_code}")
+                self.failed_tests.append({
+                    'name': 'Document Upload',
+                    'endpoint': '/api/documents/upload',
+                    'reason': f'Expected 200, got {response.status_code}',
+                    'status': response.status_code
+                })
+                return False, {}
+                
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            self.failed_tests.append({
+                'name': 'Document Upload',
+                'endpoint': '/api/documents/upload',
+                'reason': f'Error: {str(e)}',
+                'status': 'error'
+            })
+            return False, {}
+    
+    def test_get_documents(self):
+        """Test get documents endpoint"""
+        success, response = self.run_test(
+            "Get Documents",
+            "GET",
+            "/api/documents",
+            200,
+            check_response=lambda r: 'documents' in r and isinstance(r['documents'], list)
+        )
+        return success, response
+    
+    def test_full_text_search(self):
+        """Test full-text search endpoint"""
+        data = {
+            "query": "test",
+            "filters": {},
+            "limit": 20
+        }
+        # Note: Full-text search uses Elasticsearch if configured, otherwise falls back to MongoDB
+        success, response = self.run_test(
+            "Full-Text Search",
+            "POST",
+            "/api/search/full",
+            200,
+            data=data,
+            check_response=lambda r: 'results' in r
+        )
+        return success, response
+
     def print_summary(self):
         """Print test summary"""
         print("\n" + "="*60)
@@ -392,6 +614,51 @@ def main():
     # Test 10: Analytics
     tester.test_get_analytics_overview()
     tester.test_get_activities()
+    
+    # ==================== V2.0 INTEGRATION TESTS ====================
+    print("\n" + "="*60)
+    print("🚀 TESTING V2.0 FEATURES - REAL INTEGRATIONS")
+    print("="*60)
+    
+    # Test 11: Integration Status
+    status_success, status_data = tester.test_integration_status()
+    if status_success:
+        print(f"\n📊 Integration Status:")
+        print(f"   Slack: {'✅ Connected' if status_data.get('slack', {}).get('connected') else '❌ Not Connected'}")
+        print(f"   GitHub: {'✅ Connected' if status_data.get('github', {}).get('connected') else '❌ Not Connected'}")
+        print(f"   Neo4j: {'✅ Connected' if status_data.get('neo4j', {}).get('connected') else '❌ Not Connected'}")
+        print(f"   Elasticsearch: {'✅ Connected' if status_data.get('elasticsearch', {}).get('connected') else '❌ Not Connected'}")
+    
+    # Test 12: Individual Integration Tests
+    tester.test_slack_connection()
+    tester.test_github_connection()
+    tester.test_neo4j_status()
+    tester.test_elasticsearch_status()
+    
+    # Test 13: Data Sync (only if integrations are connected)
+    if status_success and status_data.get('slack', {}).get('connected'):
+        print("\n🔄 Testing Slack Sync...")
+        sync_success, sync_data = tester.test_slack_sync()
+        if sync_success:
+            print(f"   Sync Stats: {sync_data.get('stats', {})}")
+    
+    if status_success and status_data.get('github', {}).get('connected'):
+        print("\n🔄 Testing GitHub Sync...")
+        sync_success, sync_data = tester.test_github_sync()
+        if sync_success:
+            print(f"   Sync Stats: {sync_data.get('stats', {})}")
+    
+    # Test 14: Document Upload
+    upload_success, upload_data = tester.test_document_upload()
+    if upload_success:
+        print(f"   Document ID: {upload_data.get('document', {}).get('document_id')}")
+        print(f"   Knowledge Node ID: {upload_data.get('knowledge_node_id')}")
+    
+    # Test 15: Get Documents
+    tester.test_get_documents()
+    
+    # Test 16: Full-Text Search
+    tester.test_full_text_search()
     
     # Print summary
     tester.print_summary()
