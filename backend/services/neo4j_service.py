@@ -57,34 +57,7 @@ class Neo4jService:
         """Create a node in the knowledge graph"""
         if not self.driver:
             return None
-        
-        query = """
-        MERGE (n:KnowledgeNode {node_id: $node_id})
-        SET n.type = $node_type,
-            n.title = $title,
-            n.content = $content,
-            n.user_id = $user_id,
-            n.created_at = datetime(),
-            n.updated_at = datetime()
-        SET n += $metadata
-        SET n:$label
-        RETURN n
-        """
-        
-        # Dynamic label based on type
-        label_query = f"""
-        MERGE (n:KnowledgeNode {{node_id: $node_id}})
-        SET n.type = $node_type,
-            n.title = $title,
-            n.content = $content,
-            n.user_id = $user_id,
-            n.created_at = datetime(),
-            n.updated_at = datetime()
-        WITH n
-        CALL apoc.create.addLabels(n, [$node_type]) YIELD node
-        RETURN node
-        """
-        
+
         # Simpler query without APOC
         simple_query = """
         MERGE (n:KnowledgeNode {node_id: $node_id})

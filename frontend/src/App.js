@@ -1328,9 +1328,9 @@ const AIChatPage = () => {
                   'What data sources are connected?',
                   'Show me recent activity',
                   'Summarize my knowledge base'
-                ].map((suggestion, idx) => (
+                ].map((suggestion) => (
                   <button
-                    key={idx}
+                    key={suggestion}
                     onClick={() => setInput(suggestion)}
                     className="px-3 py-2 bg-zinc-100 rounded-md text-sm text-zinc-600 hover:bg-zinc-200 transition-colors"
                   >

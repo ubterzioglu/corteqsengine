@@ -27,7 +27,11 @@ async def init_supabase() -> AsyncClient:
     """Create the singleton AsyncClient. Called from FastAPI lifespan."""
     global _client
     if _client is None:
-        _client = await acreate_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+        try:
+            _client = await acreate_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+        except Exception:
+            _client = None
+            raise
     return _client
 
 

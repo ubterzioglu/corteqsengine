@@ -1,4 +1,5 @@
 """Seed a test user and session for backend testing."""
+import os
 from dotenv import load_dotenv
 load_dotenv("/app/backend/.env")
 
@@ -6,9 +7,9 @@ import asyncio
 from datetime import datetime, timezone, timedelta
 from database import init_supabase, get_supabase
 
-TEST_USER_ID = "user_test123456"
-TEST_EMAIL = "test@corteqs.com"
-TEST_TOKEN = "test_session_corteqs"
+TEST_USER_ID = os.environ.get("TEST_USER_ID", "user_test123456")
+TEST_EMAIL = os.environ.get("TEST_EMAIL", "test@corteqs.com")
+TEST_TOKEN = os.environ.get("TEST_SESSION_TOKEN", "test_session_corteqs")
 
 
 async def seed():

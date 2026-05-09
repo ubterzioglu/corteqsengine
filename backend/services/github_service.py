@@ -31,7 +31,7 @@ class GitHubService:
             for repo in self.client.get_user().get_repos()[:limit]:
                 try:
                     topics = repo.get_topics()
-                except:
+                except GithubException:
                     topics = []
                 
                 repos.append({
@@ -88,7 +88,7 @@ class GitHubService:
         try:
             readme = repo.get_readme()
             return readme.decoded_content.decode("utf-8")[:5000]  # Limit content
-        except:
+        except (GithubException, UnicodeDecodeError):
             return None
     
     def get_repo_issues(
@@ -115,7 +115,7 @@ class GitHubService:
                         "state": issue.state,
                         "url": issue.html_url,
                         "user": issue.user.login if issue.user else None,
-                        "labels": [l.name for l in issue.labels],
+                        "labels": [lbl.name for lbl in issue.labels],
                         "comments": issue.comments,
                         "created_at": issue.created_at.isoformat() if issue.created_at else None,
                         "updated_at": issue.updated_at.isoformat() if issue.updated_at else None

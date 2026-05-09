@@ -13,8 +13,9 @@ import requests
 from dotenv import load_dotenv
 
 load_dotenv("/app/frontend/.env")
+load_dotenv("/app/backend/.env", override=False)
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL").rstrip("/")
-TOKEN = "test_session_corteqs"
+TOKEN = os.environ.get("TEST_SESSION_TOKEN", "test_session_corteqs")
 HEADERS = {"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"}
 TIMEOUT = 30
 

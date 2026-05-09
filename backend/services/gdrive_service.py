@@ -168,7 +168,7 @@ class GoogleDriveService:
             fh = io.BytesIO()
             downloader = MediaIoBaseDownload(fh, request)
             done = False
-            while done is False:
+            while not done:
                 status, done = downloader.next_chunk()
             
             fh.seek(0)
@@ -177,7 +177,7 @@ class GoogleDriveService:
             # Try to decode as text
             try:
                 return content.decode('utf-8')[:10000]  # Limit content size
-            except:
+            except UnicodeDecodeError:
                 return content.decode('latin-1')[:10000]
                 
         except Exception as e:
