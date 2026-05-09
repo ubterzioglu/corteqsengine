@@ -4,6 +4,7 @@ CorteQS Intelligence Engine - Backend Server (entry point).
 Slim FastAPI app: lifespan, CORS, and router registration only.
 All endpoints live under /app/backend/routes/.
 """
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -49,9 +50,23 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+cors_origins_env = os.environ.get("CORS_ORIGINS", "").strip()
+cors_origins = [
+    origin.strip()
+    for origin in cors_origins_env.split(",")
+    if origin.strip()
+]
+if not cors_origins:
+    cors_origins = [
+        "http://localhost",
+        "http://127.0.0.1",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -19,7 +19,6 @@ SUPPORTED_TYPES = (".txt", ".md", ".pdf", ".docx", ".json", ".csv")
 
 @router.post("/upload")
 async def upload_document(file: UploadFile = File(...), user: User = Depends(get_current_user)):
-    from emergentintegrations.llm.chat import LlmChat, UserMessage
     sb = get_supabase()
 
     content = await file.read()
@@ -42,6 +41,7 @@ async def upload_document(file: UploadFile = File(...), user: User = Depends(get
     document_id = f"doc_{uuid.uuid4().hex[:12]}"
 
     try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
         chat = LlmChat(
             api_key=EMERGENT_LLM_KEY,
             session_id=f"extract_{document_id}",

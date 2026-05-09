@@ -16,7 +16,6 @@ EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY")
 
 @router.post("")
 async def chat_with_ai(request: ChatRequest, user: User = Depends(get_current_user)):
-    from emergentintegrations.llm.chat import LlmChat, UserMessage
     sb = get_supabase()
 
     user_msg_id = f"msg_{uuid.uuid4().hex[:12]}"
@@ -66,6 +65,7 @@ Guidelines:
 - Provide actionable insights when possible"""
 
     try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
         session_id = request.session_id or f"chat_{user.user_id}_{datetime.now().strftime('%Y%m%d')}"
         chat = LlmChat(
             api_key=EMERGENT_LLM_KEY,

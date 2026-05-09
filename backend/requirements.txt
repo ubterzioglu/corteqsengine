@@ -4,7 +4,6 @@ supabase==2.30.0
 pydantic==2.13.4
 python-dotenv==1.0.1
 httpx==0.28.1
-emergentintegrations
 slack-sdk==3.41.0
 PyGithub==2.9.1
 neo4j==6.2.0
