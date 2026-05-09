@@ -96,6 +96,11 @@ Databases
 |---------|--------|---------|
 | Slack | ✅ Connected | CorteQS workspace |
 | GitHub | ✅ Connected | @ubterzioglu (67 repos) |
-| Neo4j | ✅ Connected | Aura cloud (corteqs) |
-| Elasticsearch | ⏳ Pending | Awaiting credentials |
+| Neo4j | ✅ Connected | Aura cloud - 20 nodes synced |
+| Elasticsearch | ✅ Connected | Cloud - 10 documents indexed |
 | Google Drive | ⏳ Pending | Awaiting credentials |
+
+## Data Synced
+- **Neo4j**: 20 nodes (10 projects, 7 persons, 3 documents)
+- **Elasticsearch**: 10 documents indexed (GitHub repos)
+- **Full-text Search**: Working with fuzzy matching
