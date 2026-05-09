@@ -4,13 +4,11 @@ Manages Knowledge Graph with Neo4j for efficient graph operations
 """
 
 import os
-import asyncio
-from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
 from neo4j import AsyncGraphDatabase, basic_auth
 
 NEO4J_URI = os.environ.get("NEO4J_URI")
-NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
+NEO4J_USER = os.environ.get("NEO4J_USER") or os.environ.get("NEO4J_USERNAME", "neo4j")
 NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD")
 NEO4J_DATABASE = os.environ.get("NEO4J_DATABASE", "neo4j")
 
@@ -18,27 +16,61 @@ NEO4J_DATABASE = os.environ.get("NEO4J_DATABASE", "neo4j")
 class Neo4jService:
     def __init__(self):
         self.driver = None
+        self.active_uri = None
         self.is_configured = bool(
             NEO4J_URI and NEO4J_PASSWORD and 
             NEO4J_URI != "placeholder" and NEO4J_PASSWORD != "placeholder"
         )
+
+    def _candidate_uris(self) -> List[str]:
+        """Try stricter TLS first, then fallback to self-signed variants."""
+        if not NEO4J_URI:
+            return []
+
+        candidates = [NEO4J_URI]
+        if NEO4J_URI.startswith("neo4j+s://"):
+            candidates.extend([
+                NEO4J_URI.replace("neo4j+s://", "neo4j+ssc://", 1),
+                NEO4J_URI.replace("neo4j+s://", "bolt+ssc://", 1),
+            ])
+        elif NEO4J_URI.startswith("neo4j://"):
+            candidates.extend([
+                NEO4J_URI.replace("neo4j://", "neo4j+ssc://", 1),
+                NEO4J_URI.replace("neo4j://", "bolt+ssc://", 1),
+            ])
+
+        seen = set()
+        ordered = []
+        for candidate in candidates:
+            if candidate not in seen:
+                ordered.append(candidate)
+                seen.add(candidate)
+        return ordered
     
     async def connect(self):
         """Initialize Neo4j connection"""
         if not self.is_configured:
             return
         
-        try:
-            self.driver = AsyncGraphDatabase.driver(
-                NEO4J_URI,
+        last_error = None
+        for candidate_uri in self._candidate_uris():
+            driver = AsyncGraphDatabase.driver(
+                candidate_uri,
                 auth=basic_auth(NEO4J_USER, NEO4J_PASSWORD)
             )
-            # Verify connectivity
-            await self.driver.verify_connectivity()
-            print("Neo4j connected successfully")
-        except Exception as e:
-            print(f"Neo4j connection error: {e}")
-            self.driver = None
+            try:
+                await driver.verify_connectivity()
+                self.driver = driver
+                self.active_uri = candidate_uri
+                print(f"Neo4j connected successfully via {candidate_uri}")
+                return
+            except Exception as e:
+                last_error = e
+                await driver.close()
+        
+        print(f"Neo4j connection error: {last_error}")
+        self.driver = None
+        self.active_uri = None
     
     async def close(self):
         """Close Neo4j connection"""
@@ -326,7 +358,11 @@ class Neo4jService:
                 async with self.driver.session(database=NEO4J_DATABASE) as session:
                     result = await session.run("RETURN 1 as test")
                     await result.single()
-                    return {"connected": True, "database": NEO4J_DATABASE}
+                    return {
+                        "connected": True,
+                        "database": NEO4J_DATABASE,
+                        "uri": self.active_uri or NEO4J_URI,
+                    }
             return {"connected": False, "error": "Driver not initialized"}
         except Exception as e:
             return {"connected": False, "error": str(e)}
