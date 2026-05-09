@@ -314,13 +314,13 @@ class CorteQSAPITester:
     # ==================== V2.0 INTEGRATION TESTS ====================
     
     def test_integration_status(self):
-        """Test integration status endpoint"""
+        """Test integration status endpoint - ALL 5 integrations"""
         success, response = self.run_test(
             "Get Integration Status",
             "GET",
             "/api/integrations/status",
             200,
-            check_response=lambda r: 'slack' in r and 'github' in r and 'neo4j' in r
+            check_response=lambda r: 'slack' in r and 'github' in r and 'neo4j' in r and 'elasticsearch' in r and 'gdrive' in r
         )
         return success, response
     
@@ -363,6 +363,17 @@ class CorteQSAPITester:
             "Test Elasticsearch Status",
             "GET",
             "/api/elasticsearch/status",
+            200,
+            check_response=lambda r: 'connected' in r
+        )
+        return success, response
+    
+    def test_gdrive_connection(self):
+        """Test Google Drive connection endpoint"""
+        success, response = self.run_test(
+            "Test Google Drive Connection",
+            "GET",
+            "/api/integrations/gdrive/test",
             200,
             check_response=lambda r: 'connected' in r
         )
@@ -475,6 +486,17 @@ class CorteQSAPITester:
                 'status': 'error'
             })
             return False, {}
+    
+    def test_gdrive_sync(self):
+        """Test Google Drive data sync endpoint"""
+        success, response = self.run_test(
+            "Sync Google Drive Data",
+            "POST",
+            "/api/integrations/gdrive/sync",
+            200,
+            check_response=lambda r: 'success' in r
+        )
+        return success, response
     
     def test_document_upload(self):
         """Test document upload endpoint"""
@@ -589,7 +611,7 @@ class CorteQSAPITester:
 
 def main():
     # Configuration
-    BASE_URL = "https://file-inspector-80.preview.emergentagent.com"
+    BASE_URL = "https://27c4ad23-b20f-41cf-b584-cd36c03b1a52.preview.emergentagent.com"
     SESSION_TOKEN = "test_session_corteqs"
     
     print("="*60)
@@ -661,12 +683,14 @@ def main():
         print(f"   GitHub: {'✅ Connected' if status_data.get('github', {}).get('connected') else '❌ Not Connected'}")
         print(f"   Neo4j: {'✅ Connected' if status_data.get('neo4j', {}).get('connected') else '❌ Not Connected'}")
         print(f"   Elasticsearch: {'✅ Connected' if status_data.get('elasticsearch', {}).get('connected') else '❌ Not Connected'}")
+        print(f"   Google Drive: {'✅ Connected' if status_data.get('gdrive', {}).get('connected') else '❌ Not Connected'}")
     
     # Test 12: Individual Integration Tests
     tester.test_slack_connection()
     tester.test_github_connection()
     tester.test_neo4j_status()
     tester.test_elasticsearch_status()
+    tester.test_gdrive_connection()
     
     # Test 12a: Neo4j Stats and Graph Data
     print("\n📊 Testing Neo4j Data...")
@@ -694,6 +718,12 @@ def main():
     if status_success and status_data.get('github', {}).get('connected'):
         print("\n🔄 Testing GitHub Sync...")
         sync_success, sync_data = tester.test_github_sync()
+        if sync_success:
+            print(f"   Sync Stats: {sync_data.get('stats', {})}")
+    
+    if status_success and status_data.get('gdrive', {}).get('connected'):
+        print("\n🔄 Testing Google Drive Sync...")
+        sync_success, sync_data = tester.test_gdrive_sync()
         if sync_success:
             print(f"   Sync Stats: {sync_data.get('stats', {})}")
     

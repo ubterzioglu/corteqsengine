@@ -24,6 +24,7 @@ from services.slack_service import slack_service
 from services.github_service import github_service
 from services.neo4j_service import neo4j_service
 from services.elasticsearch_service import elasticsearch_service
+from services.gdrive_service import gdrive_service
 from services.data_sync_service import data_sync_service
 
 # Database setup
@@ -835,6 +836,72 @@ async def sync_github_data(user: User = Depends(get_current_user)):
             {"$set": {
                 "source_id": source_id,
                 "name": "GitHub",
+                "status": "connected", 
+                "last_sync": datetime.now(timezone.utc)
+            }},
+            upsert=True
+        )
+    
+    return result
+
+# ======================= GOOGLE DRIVE ENDPOINTS =======================
+
+@app.get("/api/integrations/gdrive/test")
+async def test_gdrive_connection(user: User = Depends(get_current_user)):
+    """Test Google Drive connection"""
+    return gdrive_service.test_connection()
+
+@app.get("/api/integrations/gdrive/files")
+async def get_gdrive_files(
+    folder_id: Optional[str] = None,
+    user: User = Depends(get_current_user)
+):
+    """Get files from Google Drive"""
+    files = gdrive_service.list_files(folder_id=folder_id)
+    return {"files": files, "count": len(files)}
+
+@app.get("/api/integrations/gdrive/folders")
+async def get_gdrive_folders(
+    parent_id: Optional[str] = None,
+    user: User = Depends(get_current_user)
+):
+    """Get folders from Google Drive"""
+    folders = gdrive_service.list_folders(parent_id=parent_id)
+    return {"folders": folders, "count": len(folders)}
+
+@app.get("/api/integrations/gdrive/recent")
+async def get_gdrive_recent_files(user: User = Depends(get_current_user)):
+    """Get recently modified files from Google Drive"""
+    files = gdrive_service.get_recent_files(limit=20)
+    return {"files": files, "count": len(files)}
+
+@app.get("/api/integrations/gdrive/search")
+async def search_gdrive_files(
+    q: str = Query(..., min_length=2),
+    user: User = Depends(get_current_user)
+):
+    """Search files in Google Drive"""
+    files = gdrive_service.search_files(q)
+    return {"files": files, "count": len(files), "query": q}
+
+@app.post("/api/integrations/gdrive/sync")
+async def sync_gdrive_data(
+    folder_id: Optional[str] = None,
+    user: User = Depends(get_current_user)
+):
+    """Sync Google Drive data to knowledge graph"""
+    result = await data_sync_service.sync_gdrive_data(user.user_id, folder_id)
+    
+    if result["success"]:
+        await log_activity(user.user_id, "gdrive_sync", f"Synced Google Drive data: {result['stats']}")
+        
+        # Update data source status
+        source_id = f"src_gdrive_{user.user_id}"
+        await db.data_sources.update_one(
+            {"user_id": user.user_id, "source_type": "gdrive"},
+            {"$set": {
+                "source_id": source_id,
+                "name": "Google Drive",
                 "status": "connected", 
                 "last_sync": datetime.now(timezone.utc)
             }},

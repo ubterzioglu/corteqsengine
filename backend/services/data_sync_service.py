@@ -12,6 +12,7 @@ from .slack_service import slack_service
 from .github_service import github_service
 from .neo4j_service import neo4j_service
 from .elasticsearch_service import elasticsearch_service
+from .gdrive_service import gdrive_service
 
 
 class DataSyncService:
@@ -296,6 +297,10 @@ class DataSyncService:
         github_test = github_service.test_connection()
         status["github"] = github_test
         
+        # Google Drive
+        gdrive_test = gdrive_service.test_connection()
+        status["gdrive"] = gdrive_test
+        
         # Neo4j
         neo4j_test = await neo4j_service.test_connection()
         status["neo4j"] = neo4j_test
@@ -305,6 +310,77 @@ class DataSyncService:
         status["elasticsearch"] = es_test
         
         return status
+    
+    async def sync_gdrive_data(self, user_id: str, folder_id: str = None) -> Dict[str, Any]:
+        """Sync Google Drive data to knowledge graph"""
+        if not gdrive_service.is_configured:
+            return {"success": False, "error": "Google Drive not configured"}
+        
+        stats = {"files": 0, "folders": 0, "documents_extracted": 0}
+        
+        try:
+            # Get files from Drive
+            files = gdrive_service.list_files(folder_id=folder_id, page_size=30)
+            
+            for file in files:
+                try:
+                    file_node_id = f"gdrive_file_{file['id']}"
+                    
+                    # Determine node type
+                    if file['is_folder']:
+                        node_type = "topic"
+                        stats["folders"] += 1
+                    else:
+                        node_type = "document"
+                        stats["files"] += 1
+                    
+                    # Get content for documents
+                    content = ""
+                    if not file['is_folder'] and file['mime_type'] in [
+                        'application/vnd.google-apps.document',
+                        'application/vnd.google-apps.spreadsheet',
+                        'application/vnd.google-apps.presentation'
+                    ]:
+                        content = gdrive_service.get_file_content(file['id'], file['mime_type']) or ""
+                        if content:
+                            stats["documents_extracted"] += 1
+                    
+                    # Create in Neo4j
+                    if neo4j_service.driver:
+                        await neo4j_service.create_node(
+                            node_id=file_node_id,
+                            node_type=node_type,
+                            title=file['name'],
+                            content=content[:5000] if content else f"Google Drive file: {file['name']}",
+                            metadata={
+                                "gdrive_id": file['id'],
+                                "mime_type": file['mime_type'],
+                                "web_link": file.get('web_link'),
+                                "owners": file.get('owners', []),
+                                "modified_at": file.get('modified_at')
+                            },
+                            user_id=user_id
+                        )
+                    
+                    # Index in Elasticsearch
+                    if elasticsearch_service.client:
+                        await elasticsearch_service.index_node(
+                            node_id=file_node_id,
+                            user_id=user_id,
+                            node_type=node_type,
+                            title=file['name'],
+                            content=content[:10000] if content else f"Google Drive file: {file['name']}",
+                            source_type="gdrive",
+                            tags=["gdrive", file['mime_type'].split('.')[-1] if '.' in file['mime_type'] else "file"]
+                        )
+                        
+                except Exception as e:
+                    print(f"Error syncing GDrive file {file.get('name')}: {e}")
+            
+            return {"success": True, "stats": stats}
+        
+        except Exception as e:
+            return {"success": False, "error": str(e), "stats": stats}
 
 
 # Singleton instance

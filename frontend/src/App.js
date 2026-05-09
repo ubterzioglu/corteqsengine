@@ -520,7 +520,7 @@ const DataSourcesPage = () => {
   const sourceTypes = [
     { type: 'slack', name: 'Slack', icon: SlackLogo, color: 'bg-purple-500', hasRealIntegration: true },
     { type: 'github', name: 'GitHub', icon: GithubLogo, color: 'bg-zinc-800', hasRealIntegration: true },
-    { type: 'gdrive', name: 'Google Drive', icon: GoogleDriveLogo, color: 'bg-yellow-500', hasRealIntegration: false },
+    { type: 'gdrive', name: 'Google Drive', icon: GoogleDriveLogo, color: 'bg-yellow-500', hasRealIntegration: true },
     { type: 'email', name: 'Email', icon: Envelope, color: 'bg-blue-500', hasRealIntegration: false },
     { type: 'whatsapp', name: 'WhatsApp', icon: WhatsappLogo, color: 'bg-green-500', hasRealIntegration: false },
   ];
@@ -636,7 +636,7 @@ const DataSourcesPage = () => {
       {/* Real-time Integration Status */}
       <div className="mb-8">
         <h3 className="font-display text-lg font-bold mb-4">Live Integrations</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Slack Integration */}
           <div className="bg-white border border-zinc-200 rounded-md p-5">
             <div className="flex items-center justify-between mb-4">
@@ -645,10 +645,10 @@ const DataSourcesPage = () => {
                   <SlackLogo size={20} weight="fill" className="text-white" />
                 </div>
                 <div>
-                  <p className="font-medium">Slack</p>
+                  <p className="font-medium text-sm">Slack</p>
                   <div className="flex items-center gap-1">
                     <span className={`w-2 h-2 rounded-full ${integrationStatus.slack?.connected ? 'bg-emerald-500' : 'bg-zinc-300'}`} />
-                    <span className="text-xs text-zinc-500">
+                    <span className="text-xs text-zinc-500 truncate max-w-[80px]">
                       {integrationStatus.slack?.connected ? integrationStatus.slack.team : 'Not connected'}
                     </span>
                   </div>
@@ -660,10 +660,10 @@ const DataSourcesPage = () => {
                 data-testid="sync-slack-btn"
                 onClick={() => syncSource('slack')}
                 disabled={syncing.slack}
-                className="w-full flex items-center justify-center gap-2 bg-purple-50 text-purple-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-purple-100 transition-colors disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 bg-purple-50 text-purple-700 px-3 py-2 rounded-md text-xs font-medium hover:bg-purple-100 transition-colors disabled:opacity-50"
               >
-                {syncing.slack ? <Spinner size={16} className="animate-spin" /> : <ArrowsClockwise size={16} />}
-                {syncing.slack ? 'Syncing...' : 'Sync Data'}
+                {syncing.slack ? <Spinner size={14} className="animate-spin" /> : <ArrowsClockwise size={14} />}
+                {syncing.slack ? 'Syncing...' : 'Sync'}
               </button>
             )}
           </div>
@@ -676,10 +676,10 @@ const DataSourcesPage = () => {
                   <GithubLogo size={20} weight="fill" className="text-white" />
                 </div>
                 <div>
-                  <p className="font-medium">GitHub</p>
+                  <p className="font-medium text-sm">GitHub</p>
                   <div className="flex items-center gap-1">
                     <span className={`w-2 h-2 rounded-full ${integrationStatus.github?.connected ? 'bg-emerald-500' : 'bg-zinc-300'}`} />
-                    <span className="text-xs text-zinc-500">
+                    <span className="text-xs text-zinc-500 truncate max-w-[80px]">
                       {integrationStatus.github?.connected ? `@${integrationStatus.github.login}` : 'Not connected'}
                     </span>
                   </div>
@@ -691,10 +691,41 @@ const DataSourcesPage = () => {
                 data-testid="sync-github-btn"
                 onClick={() => syncSource('github')}
                 disabled={syncing.github}
-                className="w-full flex items-center justify-center gap-2 bg-zinc-100 text-zinc-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-zinc-200 transition-colors disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 bg-zinc-100 text-zinc-700 px-3 py-2 rounded-md text-xs font-medium hover:bg-zinc-200 transition-colors disabled:opacity-50"
               >
-                {syncing.github ? <Spinner size={16} className="animate-spin" /> : <ArrowsClockwise size={16} />}
-                {syncing.github ? 'Syncing...' : 'Sync Repos'}
+                {syncing.github ? <Spinner size={14} className="animate-spin" /> : <ArrowsClockwise size={14} />}
+                {syncing.github ? 'Syncing...' : 'Sync'}
+              </button>
+            )}
+          </div>
+
+          {/* Google Drive Integration */}
+          <div className="bg-white border border-zinc-200 rounded-md p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-md bg-yellow-500 flex items-center justify-center">
+                  <GoogleDriveLogo size={20} weight="fill" className="text-white" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">Google Drive</p>
+                  <div className="flex items-center gap-1">
+                    <span className={`w-2 h-2 rounded-full ${integrationStatus.gdrive?.connected ? 'bg-emerald-500' : 'bg-zinc-300'}`} />
+                    <span className="text-xs text-zinc-500">
+                      {integrationStatus.gdrive?.connected ? 'Connected' : 'Not connected'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {integrationStatus.gdrive?.connected && (
+              <button
+                data-testid="sync-gdrive-btn"
+                onClick={() => syncSource('gdrive')}
+                disabled={syncing.gdrive}
+                className="w-full flex items-center justify-center gap-2 bg-yellow-50 text-yellow-700 px-3 py-2 rounded-md text-xs font-medium hover:bg-yellow-100 transition-colors disabled:opacity-50"
+              >
+                {syncing.gdrive ? <Spinner size={14} className="animate-spin" /> : <ArrowsClockwise size={14} />}
+                {syncing.gdrive ? 'Syncing...' : 'Sync'}
               </button>
             )}
           </div>
@@ -706,11 +737,11 @@ const DataSourcesPage = () => {
                 <Graph size={20} weight="fill" className="text-white" />
               </div>
               <div>
-                <p className="font-medium">Neo4j</p>
+                <p className="font-medium text-sm">Neo4j</p>
                 <div className="flex items-center gap-1">
                   <span className={`w-2 h-2 rounded-full ${integrationStatus.neo4j?.connected ? 'bg-emerald-500' : 'bg-zinc-300'}`} />
                   <span className="text-xs text-zinc-500">
-                    {integrationStatus.neo4j?.connected ? 'Graph DB Active' : 'Not connected'}
+                    {integrationStatus.neo4j?.connected ? 'Graph DB' : 'Not connected'}
                   </span>
                 </div>
               </div>
@@ -724,11 +755,11 @@ const DataSourcesPage = () => {
                 <MagnifyingGlass size={20} weight="fill" className="text-white" />
               </div>
               <div>
-                <p className="font-medium">Elasticsearch</p>
+                <p className="font-medium text-sm">Elasticsearch</p>
                 <div className="flex items-center gap-1">
                   <span className={`w-2 h-2 rounded-full ${integrationStatus.elasticsearch?.connected ? 'bg-emerald-500' : 'bg-zinc-300'}`} />
                   <span className="text-xs text-zinc-500">
-                    {integrationStatus.elasticsearch?.connected ? 'Search Active' : 'Not configured'}
+                    {integrationStatus.elasticsearch?.connected ? 'Search' : 'Not configured'}
                   </span>
                 </div>
               </div>
