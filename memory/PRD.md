@@ -6,9 +6,11 @@ Build CorteQS Intelligence Engine - A comprehensive Corporate Memory and AI-powe
 ## User Choices
 - **Scope**: Full-scale development with all modules
 - **AI/LLM**: Gemini 3 Pro (using Emergent LLM Key)
-- **Databases**: Neo4j (cloud) + MongoDB + Elasticsearch (pending)
+- **Primary Database**: Supabase (PostgreSQL) — migrated from MongoDB on 2026-02-09
+- **Knowledge Graph DB**: Neo4j Aura (cloud)
+- **Search Index**: Elasticsearch Cloud
 - **Authentication**: Google OAuth via Emergent Auth
-- **Real Integrations**: Slack, GitHub (LIVE)
+- **Real Integrations**: Slack, GitHub, Google Drive (LIVE)
 
 ## Architecture v2.0
 ```
@@ -26,7 +28,7 @@ Frontend (React + Tailwind)
     ├── Analytics (Metrics + Distribution)
     └── Document Upload (AI extraction)
     │
-Backend (FastAPI + Motor)
+Backend (FastAPI + Supabase async client)
     │
     ├── Auth APIs (/api/auth/*)
     ├── Data Source APIs (/api/data-sources/*)
@@ -37,6 +39,7 @@ Backend (FastAPI + Motor)
     ├── Integration APIs (/api/integrations/*)
     │   ├── Slack sync
     │   ├── GitHub sync
+    │   ├── Google Drive sync
     │   └── Status checks
     ├── Neo4j APIs (/api/neo4j/*)
     ├── Elasticsearch APIs (/api/elasticsearch/*)
@@ -44,9 +47,9 @@ Backend (FastAPI + Motor)
     │
 Databases
     │
-    ├── MongoDB (users, sessions, activities, documents)
-    ├── Neo4j Aura (Knowledge Graph nodes & edges)
-    └── Elasticsearch Cloud (Full-text search - pending)
+    ├── Supabase (PostgreSQL): users, user_sessions, data_sources, knowledge_nodes, chat_messages, activities, documents
+    ├── Neo4j Aura: Knowledge Graph nodes & edges
+    └── Elasticsearch Cloud: Full-text search
 ```
 
 ## What's Been Implemented
@@ -64,11 +67,22 @@ Databases
 - ✅ Real Slack API integration (channels, users, messages)
 - ✅ Real GitHub API integration (repos, issues, PRs, contributors)
 - ✅ Neo4j Aura cloud database for Knowledge Graph
-- ✅ Data sync from Slack/GitHub to Neo4j
+- ✅ Elasticsearch Cloud full-text search
+- ✅ Google Drive service account integration
+- ✅ Data sync from Slack/GitHub/GDrive to Neo4j + Elasticsearch
 - ✅ Document upload with AI-powered extraction
 - ✅ Live integrations panel in frontend
-- ⏳ Elasticsearch (awaiting credentials)
-- ⏳ Google Drive integration (awaiting credentials)
+- ✅ Detailed user manual at /manual.html
+
+**Date: 2026-02-09 (v2.1) — Supabase Migration**
+- ✅ Replaced MongoDB with Supabase (PostgreSQL) as the primary database
+- ✅ New `/app/backend/database.py` async Supabase client wrapper
+- ✅ Schema file `/app/backend/sql/schema.sql` with 7 tables, indexes & pg_trgm extension
+- ✅ Removed motor/pymongo from requirements.txt and codebase entirely
+- ✅ All endpoints rewritten with supabase-py async API (eq, ilike, or_, upsert, JSONB ops)
+- ✅ Test seed script at `/app/backend/seed_test_user.py`
+- ✅ 35/35 backend regression tests passed (iteration_5.json)
+- ✅ Health endpoint reports `database=supabase`, `version=2.1.0`
 
 ## Prioritized Backlog
 
@@ -76,20 +90,26 @@ Databases
 - [x] Real Slack API integration
 - [x] Real GitHub API integration
 - [x] Neo4j graph database
-- [ ] Elasticsearch full-text search (credentials needed)
-- [ ] Google Drive integration (credentials needed)
+- [x] Elasticsearch full-text search
+- [x] Google Drive integration
+- [x] Migrate MongoDB → Supabase
 
 ### P1 - High Priority
+- [ ] Recursive sync for Google Drive subfolders
+- [ ] Sync Slack channel messages (needs channels:history scope)
 - [ ] Real-time webhooks for Slack/GitHub
 - [ ] Advanced graph algorithms (PageRank)
 - [ ] Vector embeddings for semantic search
-- [ ] Export/import functionality
+- [ ] Split server.py (~955 lines) into routers/* modules
+- [ ] Replace knowledge_nodes.connections JSONB read-modify-write with separate edges table or RPC for atomicity
 
 ### P2 - Medium Priority
+- [ ] Extract Google Docs content directly into Knowledge Graph
 - [ ] Recommendation engine
-- [ ] Financial dashboard integration
 - [ ] Custom report generation
 - [ ] RBAC (role-based access control)
+- [ ] Multi-device sessions (current upsert keeps one per user)
+- [ ] Replace CORS allow_origins=['*'] with frontend URL when allow_credentials=True
 
 ## Connected Services
 | Service | Status | Details |
