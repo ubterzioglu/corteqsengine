@@ -388,6 +388,7 @@
             <a href="#arama">Arama</a>
             <a href="#analitik">Analitik</a>
             <a href="#entegrasyonlar">Entegrasyonlar</a>
+            <a href="#credentials">API Anahtarları</a>
             <a href="#sss">SSS</a>
         </div>
     </nav>
@@ -770,50 +771,463 @@
         
         <!-- Entegrasyonlar -->
         <section id="entegrasyonlar" class="section">
-            <h2>⚙️ Entegrasyon Kurulumları</h2>
+            <h2>⚙️ Entegrasyon Kurulumları ve API Anahtarları</h2>
+            <p>CorteQS Intelligence Engine, kurumsal verilerinizi toplamak için çeşitli harici servislerle entegre çalışır. 
+            Bu bölümde her bir entegrasyon için gerekli API anahtarları, ne işe yaradıkları ve nasıl alınacakları detaylı olarak açıklanmaktadır.</p>
             
-            <h3>Slack Entegrasyonu</h3>
-            <p>Slack workspace'inizdeki kanalları, kullanıcıları ve mesajları çekin.</p>
             <div class="info-box tip">
-                <strong>Gereksinimler:</strong>
-                <ul>
-                    <li>Slack Bot Token (xoxb-... formatında)</li>
-                    <li>Bot'un kanallara erişim izni</li>
-                </ul>
+                <strong>🔐 Güvenlik Notu</strong>
+                Tüm API anahtarları sunucu tarafında güvenli bir şekilde saklanır ve asla istemci tarafına gönderilmez.
+                Anahtarlarınızı kimseyle paylaşmayın.
+            </div>
+        </section>
+
+        <!-- Slack Detaylı -->
+        <section class="section">
+            <h2>💬 Slack Entegrasyonu</h2>
+            
+            <h3>Ne İşe Yarar?</h3>
+            <p>Slack entegrasyonu, workspace'inizdeki iletişim verilerini CorteQS'e aktarır:</p>
+            <ul>
+                <li><strong>Kullanıcılar:</strong> Tüm workspace üyeleri "Person" düğümü olarak kaydedilir</li>
+                <li><strong>Kanallar:</strong> Public ve private kanallar "Topic" düğümü olarak eklenir</li>
+                <li><strong>Mesajlar:</strong> Kanal mesajları "Document" düğümü olarak indekslenir</li>
+                <li><strong>İlişkiler:</strong> Kim hangi kanalda yazdı, kim kime cevap verdi gibi bağlantılar kurulur</li>
+            </ul>
+            
+            <h3>Neden Gerekli?</h3>
+            <p>Kurumsal iletişiminizi aranabilir ve analiz edilebilir hale getirir. AI Asistan'a 
+            "Geçen hafta marketing kanalında ne konuşuldu?" gibi sorular sorabilirsiniz.</p>
+            
+            <h3>Gerekli Credential</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Değişken</th>
+                        <th>Format</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>SLACK_BOT_TOKEN</code></td>
+                        <td><code>xoxb-...</code> veya <code>xoxe-...</code></td>
+                        <td>Slack Bot User OAuth Token</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Nasıl Alınır?</h3>
+            <div class="steps">
+                <div class="step">
+                    <h4>Slack API Sayfasına Gidin</h4>
+                    <p><a href="https://api.slack.com/apps" target="_blank">https://api.slack.com/apps</a> adresine gidin.</p>
+                </div>
+                <div class="step">
+                    <h4>Yeni App Oluşturun</h4>
+                    <p>"Create New App" → "From scratch" seçin. App adı ve workspace belirleyin.</p>
+                </div>
+                <div class="step">
+                    <h4>OAuth & Permissions Ayarlayın</h4>
+                    <p>Sol menüden "OAuth & Permissions" seçin. "Bot Token Scopes" altına şu izinleri ekleyin:</p>
+                    <ul>
+                        <li><code>channels:history</code> - Kanal mesajlarını okuma</li>
+                        <li><code>channels:read</code> - Kanal listesini görme</li>
+                        <li><code>users:read</code> - Kullanıcı bilgilerini okuma</li>
+                        <li><code>users:read.email</code> - Email adreslerini okuma</li>
+                        <li><code>files:read</code> - Paylaşılan dosyaları okuma</li>
+                    </ul>
+                </div>
+                <div class="step">
+                    <h4>Workspace'e Yükleyin</h4>
+                    <p>"Install to Workspace" butonuna tıklayın ve izinleri onaylayın.</p>
+                </div>
+                <div class="step">
+                    <h4>Token'ı Kopyalayın</h4>
+                    <p>"Bot User OAuth Token" değerini kopyalayın. <code>xoxb-</code> ile başlar.</p>
+                </div>
             </div>
             
-            <h3>GitHub Entegrasyonu</h3>
-            <p>Repository'lerinizi, issue'ları, PR'ları ve contributor'ları çekin.</p>
-            <div class="info-box tip">
-                <strong>Gereksinimler:</strong>
-                <ul>
-                    <li>Personal Access Token (ghp_... formatında)</li>
-                    <li>repo, read:user izinleri</li>
-                </ul>
-            </div>
-            
-            <h3>Google Drive Entegrasyonu</h3>
-            <p>Drive'daki dosya ve klasörlerinizi indeksleyin.</p>
             <div class="info-box warning">
-                <strong>⚠️ Önemli:</strong>
-                Dosyalarınızı şu service account ile paylaşın:
-                <br><br>
-                <code>corteqs-drive-sync@gen-lang-client-0322325978.iam.gserviceaccount.com</code>
+                <strong>⚠️ Kanal Erişimi</strong>
+                Bot'un mesajları okuyabilmesi için ilgili kanallara eklenmesi gerekir. 
+                Public kanallar için bot'u kanala davet edin: <code>/invite @botadı</code>
+            </div>
+        </section>
+
+        <!-- GitHub Detaylı -->
+        <section class="section">
+            <h2>🐙 GitHub Entegrasyonu</h2>
+            
+            <h3>Ne İşe Yarar?</h3>
+            <p>GitHub entegrasyonu, kod tabanınız ve proje yönetimi verilerinizi CorteQS'e aktarır:</p>
+            <ul>
+                <li><strong>Repository'ler:</strong> Tüm repo'larınız "Project" düğümü olarak kaydedilir</li>
+                <li><strong>Issue'lar:</strong> Açık/kapalı issue'lar "Document" düğümü olarak eklenir</li>
+                <li><strong>Pull Request'ler:</strong> PR'lar "Document" düğümü olarak indekslenir</li>
+                <li><strong>Contributor'lar:</strong> Katkıda bulunanlar "Person" düğümü olarak eklenir</li>
+                <li><strong>Commit'ler:</strong> Commit mesajları ve geçmişi analiz edilir</li>
+            </ul>
+            
+            <h3>Neden Gerekli?</h3>
+            <p>Kod tabanınızı ve proje geçmişinizi aranabilir hale getirir. "Bu özellik hangi PR ile eklendi?", 
+            "Kim bu modülde en çok çalıştı?" gibi sorulara cevap bulabilirsiniz.</p>
+            
+            <h3>Gerekli Credential</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Değişken</th>
+                        <th>Format</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>GITHUB_TOKEN</code></td>
+                        <td><code>ghp_...</code> veya <code>github_pat_...</code></td>
+                        <td>Personal Access Token</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Nasıl Alınır?</h3>
+            <div class="steps">
+                <div class="step">
+                    <h4>GitHub Settings'e Gidin</h4>
+                    <p><a href="https://github.com/settings/tokens" target="_blank">https://github.com/settings/tokens</a> adresine gidin.</p>
+                </div>
+                <div class="step">
+                    <h4>Yeni Token Oluşturun</h4>
+                    <p>"Generate new token" → "Fine-grained tokens (Beta)" seçin.</p>
+                </div>
+                <div class="step">
+                    <h4>Token Ayarlarını Yapın</h4>
+                    <ul>
+                        <li><strong>Token name:</strong> "CorteQS Integration"</li>
+                        <li><strong>Expiration:</strong> 90 gün veya daha uzun</li>
+                        <li><strong>Repository access:</strong> "All repositories" veya spesifik repo'lar</li>
+                    </ul>
+                </div>
+                <div class="step">
+                    <h4>İzinleri Seçin</h4>
+                    <p>"Repository permissions" altında:</p>
+                    <ul>
+                        <li><code>Contents: Read</code> - Dosya içeriklerini okuma</li>
+                        <li><code>Issues: Read</code> - Issue'ları okuma</li>
+                        <li><code>Pull requests: Read</code> - PR'ları okuma</li>
+                        <li><code>Metadata: Read</code> - Repo bilgilerini okuma</li>
+                    </ul>
+                </div>
+                <div class="step">
+                    <h4>Token'ı Oluşturun ve Kopyalayın</h4>
+                    <p>"Generate token" tıklayın. Token sadece bir kez gösterilir, hemen kopyalayın!</p>
+                </div>
             </div>
             
-            <h3>Neo4j (Veritabanı)</h3>
-            <p>Graf veritabanı olarak Neo4j Aura Cloud kullanılmaktadır.</p>
+            <div class="info-box tip">
+                <strong>💡 İpucu</strong>
+                Fine-grained token'lar daha güvenlidir çünkü sadece belirli repo'lara ve izinlere erişim verirsiniz.
+            </div>
+        </section>
+
+        <!-- Google Drive Detaylı -->
+        <section class="section">
+            <h2>📁 Google Drive Entegrasyonu</h2>
+            
+            <h3>Ne İşe Yarar?</h3>
+            <p>Google Drive entegrasyonu, bulut depolamanızdaki dokümanları CorteQS'e aktarır:</p>
             <ul>
-                <li>Tüm düğümler ve ilişkiler Neo4j'de saklanır</li>
-                <li>Graf sorguları ve algoritmalar desteklenir</li>
+                <li><strong>Klasörler:</strong> Drive klasörleri "Topic" düğümü olarak kaydedilir</li>
+                <li><strong>Dokümanlar:</strong> Google Docs, Sheets, Slides "Document" düğümü olarak eklenir</li>
+                <li><strong>İçerik Çıkarımı:</strong> Doküman içerikleri otomatik olarak okunur ve indekslenir</li>
+                <li><strong>Paylaşım Bilgileri:</strong> Kim kiminle ne paylaşmış analiz edilir</li>
             </ul>
             
-            <h3>Elasticsearch (Arama)</h3>
-            <p>Full-text arama için Elasticsearch Cloud kullanılmaktadır.</p>
+            <h3>Neden Gerekli?</h3>
+            <p>Kurumsal dokümanlarınızı merkezi olarak aranabilir hale getirir. "Marketing planı nerede?", 
+            "2024 bütçe tablosu kim tarafından hazırlandı?" gibi sorulara cevap bulabilirsiniz.</p>
+            
+            <h3>Gerekli Credential</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Değişken</th>
+                        <th>Format</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>GOOGLE_SERVICE_ACCOUNT_JSON</code></td>
+                        <td>JSON dosyası</td>
+                        <td>Service Account credentials</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Nasıl Alınır?</h3>
+            <div class="steps">
+                <div class="step">
+                    <h4>Google Cloud Console'a Gidin</h4>
+                    <p><a href="https://console.cloud.google.com" target="_blank">https://console.cloud.google.com</a> adresine gidin.</p>
+                </div>
+                <div class="step">
+                    <h4>Proje Oluşturun veya Seçin</h4>
+                    <p>Yeni bir proje oluşturun veya mevcut projeyi seçin.</p>
+                </div>
+                <div class="step">
+                    <h4>Google Drive API'yi Etkinleştirin</h4>
+                    <p>"APIs & Services" → "Enable APIs" → "Google Drive API" arayın ve etkinleştirin.</p>
+                </div>
+                <div class="step">
+                    <h4>Service Account Oluşturun</h4>
+                    <p>"APIs & Services" → "Credentials" → "Create Credentials" → "Service Account"</p>
+                    <ul>
+                        <li>Service account adı girin (örn: "corteqs-drive-sync")</li>
+                        <li>"Create and Continue" tıklayın</li>
+                        <li>Role seçmeden "Done" tıklayın</li>
+                    </ul>
+                </div>
+                <div class="step">
+                    <h4>JSON Key Oluşturun</h4>
+                    <p>Oluşturulan service account'a tıklayın → "Keys" sekmesi → "Add Key" → "Create new key" → "JSON"</p>
+                    <p>İndirilen JSON dosyası sizin credential'ınızdır.</p>
+                </div>
+            </div>
+            
+            <div class="info-box danger">
+                <strong>🔴 Kritik Adım: Dosya Paylaşımı</strong>
+                Service account, Google Drive'ınıza otomatik erişemez. Erişmesini istediğiniz dosya/klasörleri 
+                şu email adresiyle paylaşmanız <strong>zorunludur</strong>:
+                <br><br>
+                <code style="background: #1E293B; color: #E2E8F0; padding: 10px; display: block; border-radius: 4px;">
+                    corteqs-drive-sync@gen-lang-client-0322325978.iam.gserviceaccount.com
+                </code>
+                <br>
+                <strong>Paylaşım Adımları:</strong>
+                <ol>
+                    <li>Google Drive'da klasör/dosyaya sağ tıklayın</li>
+                    <li>"Paylaş" seçin</li>
+                    <li>Yukarıdaki email'i yapıştırın</li>
+                    <li>"Görüntüleyici" izni verin</li>
+                    <li>"Gönder" tıklayın</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Neo4j Detaylı -->
+        <section class="section">
+            <h2>🕸️ Neo4j Aura (Graf Veritabanı)</h2>
+            
+            <h3>Ne İşe Yarar?</h3>
+            <p>Neo4j, CorteQS'in "beyni"dir - tüm bilgi grafiğini saklar ve yönetir:</p>
             <ul>
-                <li>Tüm içerikler indekslenir</li>
-                <li>Fuzzy matching ve autocomplete desteklenir</li>
+                <li><strong>Düğümler (Nodes):</strong> Kişiler, projeler, dokümanlar, konular</li>
+                <li><strong>İlişkiler (Edges):</strong> Kim kime bağlı, ne neyle ilişkili</li>
+                <li><strong>Graf Sorguları:</strong> "A kişisi hangi projelerde çalıştı?" gibi karmaşık sorgular</li>
+                <li><strong>Graf Algoritmaları:</strong> PageRank, Community Detection, Shortest Path</li>
             </ul>
+            
+            <h3>Neden Gerekli?</h3>
+            <p>İlişkisel veritabanları (MySQL, PostgreSQL) ilişkileri verimli sorgulayamaz. 
+            Neo4j, "3 adım uzaklıktaki tüm bağlantıları bul" gibi sorguları milisaniyede çözer.</p>
+            
+            <h3>Gerekli Credentials</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Değişken</th>
+                        <th>Format</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>NEO4J_URI</code></td>
+                        <td><code>neo4j+s://xxxxx.databases.neo4j.io</code></td>
+                        <td>Bağlantı adresi</td>
+                    </tr>
+                    <tr>
+                        <td><code>NEO4J_USER</code></td>
+                        <td><code>neo4j</code></td>
+                        <td>Kullanıcı adı (genellikle "neo4j")</td>
+                    </tr>
+                    <tr>
+                        <td><code>NEO4J_PASSWORD</code></td>
+                        <td>Rastgele string</td>
+                        <td>Veritabanı şifresi</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Nasıl Alınır?</h3>
+            <div class="steps">
+                <div class="step">
+                    <h4>Neo4j Aura'ya Gidin</h4>
+                    <p><a href="https://neo4j.com/cloud/aura/" target="_blank">https://neo4j.com/cloud/aura/</a> adresine gidin.</p>
+                </div>
+                <div class="step">
+                    <h4>Ücretsiz Hesap Oluşturun</h4>
+                    <p>"Start Free" ile kayıt olun. Free tier aylık 200k node destekler.</p>
+                </div>
+                <div class="step">
+                    <h4>Yeni Database Oluşturun</h4>
+                    <p>"Create Database" → Database adı girin (örn: "corteqs") → Region seçin → "Create"</p>
+                </div>
+                <div class="step">
+                    <h4>Credentials'ı Kaydedin</h4>
+                    <p>Database oluşturulduktan sonra şifre <strong>sadece bir kez</strong> gösterilir!</p>
+                    <ul>
+                        <li>Connection URI</li>
+                        <li>Username (neo4j)</li>
+                        <li>Password</li>
+                    </ul>
+                    <p>Hemen not edin veya ".env credentials" dosyasını indirin.</p>
+                </div>
+            </div>
+            
+            <div class="info-box warning">
+                <strong>⚠️ Şifre Uyarısı</strong>
+                Neo4j Aura şifreyi sadece database oluşturulduğunda gösterir. Kaybederseniz şifreyi sıfırlamanız gerekir.
+            </div>
+        </section>
+
+        <!-- Elasticsearch Detaylı -->
+        <section class="section">
+            <h2>🔍 Elasticsearch Cloud (Arama Motoru)</h2>
+            
+            <h3>Ne İşe Yarar?</h3>
+            <p>Elasticsearch, CorteQS'in "arama motoru"dur - tüm içeriklerde hızlı arama sağlar:</p>
+            <ul>
+                <li><strong>Full-Text Search:</strong> Tüm doküman içeriklerinde arama</li>
+                <li><strong>Fuzzy Matching:</strong> Yazım hatalarına toleranslı arama ("proje" yerine "porje" yazsan da bulur)</li>
+                <li><strong>Autocomplete:</strong> Yazarken öneri gösterimi</li>
+                <li><strong>Highlighting:</strong> Bulunan kelimeleri vurgulama</li>
+                <li><strong>Aggregations:</strong> İstatistik ve gruplama</li>
+            </ul>
+            
+            <h3>Neden Gerekli?</h3>
+            <p>Neo4j yapısal sorgular için mükemmeldir ama metin araması için değil. 
+            Elasticsearch, milyonlarca doküman içinde milisaniyede arama yapabilir.</p>
+            
+            <h3>Gerekli Credentials</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Değişken</th>
+                        <th>Format</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>ELASTICSEARCH_CLOUD_ID</code></td>
+                        <td><code>deployment:base64string</code></td>
+                        <td>Cloud deployment kimliği</td>
+                    </tr>
+                    <tr>
+                        <td><code>ELASTICSEARCH_API_KEY</code></td>
+                        <td>Base64 encoded string</td>
+                        <td>API erişim anahtarı</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Nasıl Alınır?</h3>
+            <div class="steps">
+                <div class="step">
+                    <h4>Elastic Cloud'a Gidin</h4>
+                    <p><a href="https://cloud.elastic.co" target="_blank">https://cloud.elastic.co</a> adresine gidin.</p>
+                </div>
+                <div class="step">
+                    <h4>Ücretsiz Trial Başlatın</h4>
+                    <p>14 günlük ücretsiz deneme ile başlayın. Kredi kartı gerekmez.</p>
+                </div>
+                <div class="step">
+                    <h4>Deployment Oluşturun</h4>
+                    <p>"Create deployment" → Deployment adı girin → Region seçin → "Create deployment"</p>
+                </div>
+                <div class="step">
+                    <h4>Cloud ID'yi Alın</h4>
+                    <p>Deployment oluştuktan sonra "Manage" → Overview sayfasında "Cloud ID" görünür.</p>
+                </div>
+                <div class="step">
+                    <h4>API Key Oluşturun</h4>
+                    <p>"Security" → "API Keys" → "Create API Key"</p>
+                    <ul>
+                        <li>Name girin (örn: "corteqs-access")</li>
+                        <li>"Create API Key" tıklayın</li>
+                        <li><strong>Encoded</strong> değerini kopyalayın (Base64 formatında)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="info-box tip">
+                <strong>💡 İpucu</strong>
+                Elastic Cloud 14 gün sonra ücretli olur. Alternatif olarak self-hosted Elasticsearch da kullanılabilir,
+                ancak yönetimi daha zordur.
+            </div>
+        </section>
+
+        <!-- Özet Tablo -->
+        <section class="section">
+            <h2>📋 Tüm Credentials Özet Tablosu</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Servis</th>
+                        <th>Credential</th>
+                        <th>Nereden Alınır</th>
+                        <th>Ne İçin Kullanılır</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Slack</strong></td>
+                        <td>Bot Token</td>
+                        <td>api.slack.com/apps</td>
+                        <td>Workspace mesaj ve kullanıcıları</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GitHub</strong></td>
+                        <td>Personal Access Token</td>
+                        <td>github.com/settings/tokens</td>
+                        <td>Repo, issue, PR verileri</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Google Drive</strong></td>
+                        <td>Service Account JSON</td>
+                        <td>console.cloud.google.com</td>
+                        <td>Drive dosya ve klasörleri</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Neo4j</strong></td>
+                        <td>URI + User + Password</td>
+                        <td>neo4j.com/cloud/aura</td>
+                        <td>Graf veritabanı (node/edge)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Elasticsearch</strong></td>
+                        <td>Cloud ID + API Key</td>
+                        <td>cloud.elastic.co</td>
+                        <td>Full-text arama indeksi</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="info-box success">
+                <strong>✅ Mevcut Durum</strong>
+                Tüm entegrasyonlar aktif ve çalışır durumda:
+                <ul style="margin-top: 10px;">
+                    <li>✅ Slack - CorteQS workspace bağlı</li>
+                    <li>✅ GitHub - Repository'ler senkronize</li>
+                    <li>✅ Google Drive - Klasörler senkronize</li>
+                    <li>✅ Neo4j - 52 node aktif</li>
+                    <li>✅ Elasticsearch - 42 doküman indeksli</li>
+                </ul>
+            </div>
         </section>
         
         <!-- SSS -->
