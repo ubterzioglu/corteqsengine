@@ -1,7 +1,11 @@
 """Seed a test user and session for backend testing."""
 import os
+from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv("/app/backend/.env")
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+load_dotenv(ROOT_DIR / ".env.local")
+load_dotenv(ROOT_DIR / ".env", override=False)
 
 import asyncio
 from datetime import datetime, timezone, timedelta

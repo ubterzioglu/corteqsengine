@@ -7,13 +7,15 @@ import io
 import os
 import time
 import uuid
+from pathlib import Path
 
 import pytest
 import requests
 from dotenv import load_dotenv
 
-load_dotenv("/app/frontend/.env")
-load_dotenv("/app/backend/.env", override=False)
+ROOT_DIR = Path(__file__).resolve().parents[2]
+load_dotenv(ROOT_DIR / ".env.local")
+load_dotenv(ROOT_DIR / ".env", override=False)
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL").rstrip("/")
 TOKEN = os.environ.get("TEST_SESSION_TOKEN", "test_session_corteqs")
 HEADERS = {"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"}

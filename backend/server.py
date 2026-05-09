@@ -5,9 +5,13 @@ Slim FastAPI app: lifespan, CORS, and router registration only.
 All endpoints live under /app/backend/routes/.
 """
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from dotenv import load_dotenv
-load_dotenv()
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+load_dotenv(ROOT_DIR / ".env.local")
+load_dotenv(ROOT_DIR / ".env", override=False)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

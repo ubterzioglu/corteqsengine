@@ -16,7 +16,7 @@ SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 
 if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
     raise RuntimeError(
-        "SUPABASE_URL and SUPABASE_SERVICE_KEY must be set in /app/backend/.env"
+        "SUPABASE_URL and SUPABASE_SERVICE_KEY must be set in the environment or project .env/.env.local"
     )
 
 # Lazily initialised — populated by init_supabase() during FastAPI lifespan.
