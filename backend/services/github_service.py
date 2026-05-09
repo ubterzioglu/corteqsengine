@@ -29,6 +29,11 @@ class GitHubService:
         try:
             repos = []
             for repo in self.client.get_user().get_repos()[:limit]:
+                try:
+                    topics = repo.get_topics()
+                except:
+                    topics = []
+                
                 repos.append({
                     "id": repo.id,
                     "name": repo.name,
@@ -42,7 +47,7 @@ class GitHubService:
                     "open_issues": repo.open_issues_count,
                     "created_at": repo.created_at.isoformat() if repo.created_at else None,
                     "updated_at": repo.updated_at.isoformat() if repo.updated_at else None,
-                    "topics": repo.get_topics()
+                    "topics": topics
                 })
             return repos
         except GithubException as e:

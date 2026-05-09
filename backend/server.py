@@ -759,9 +759,15 @@ async def sync_slack_data(user: User = Depends(get_current_user)):
         await log_activity(user.user_id, "slack_sync", f"Synced Slack data: {result['stats']}")
         
         # Update data source status
+        source_id = f"src_slack_{user.user_id}"
         await db.data_sources.update_one(
             {"user_id": user.user_id, "source_type": "slack"},
-            {"$set": {"status": "connected", "last_sync": datetime.now(timezone.utc)}},
+            {"$set": {
+                "source_id": source_id,
+                "name": "Slack",
+                "status": "connected", 
+                "last_sync": datetime.now(timezone.utc)
+            }},
             upsert=True
         )
     
@@ -823,9 +829,15 @@ async def sync_github_data(user: User = Depends(get_current_user)):
         await log_activity(user.user_id, "github_sync", f"Synced GitHub data: {result['stats']}")
         
         # Update data source status
+        source_id = f"src_github_{user.user_id}"
         await db.data_sources.update_one(
             {"user_id": user.user_id, "source_type": "github"},
-            {"$set": {"status": "connected", "last_sync": datetime.now(timezone.utc)}},
+            {"$set": {
+                "source_id": source_id,
+                "name": "GitHub",
+                "status": "connected", 
+                "last_sync": datetime.now(timezone.utc)
+            }},
             upsert=True
         )
     

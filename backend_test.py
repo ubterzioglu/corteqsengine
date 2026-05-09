@@ -368,6 +368,39 @@ class CorteQSAPITester:
         )
         return success, response
     
+    def test_neo4j_stats(self):
+        """Test Neo4j graph statistics endpoint"""
+        success, response = self.run_test(
+            "Get Neo4j Graph Stats",
+            "GET",
+            "/api/neo4j/stats",
+            200,
+            check_response=lambda r: 'total_nodes' in r or 'error' not in r
+        )
+        return success, response
+    
+    def test_neo4j_graph(self):
+        """Test Neo4j graph data endpoint"""
+        success, response = self.run_test(
+            "Get Neo4j Graph Data",
+            "GET",
+            "/api/neo4j/graph",
+            200,
+            check_response=lambda r: 'nodes' in r and 'edges' in r
+        )
+        return success, response
+    
+    def test_elasticsearch_search_stats(self):
+        """Test Elasticsearch search statistics endpoint"""
+        success, response = self.run_test(
+            "Get Elasticsearch Search Stats",
+            "GET",
+            "/api/search/stats",
+            200,
+            check_response=lambda r: 'total_documents' in r or 'error' not in r
+        )
+        return success, response
+    
     def test_slack_sync(self):
         """Test Slack data sync endpoint"""
         success, response = self.run_test(
@@ -556,7 +589,7 @@ class CorteQSAPITester:
 
 def main():
     # Configuration
-    BASE_URL = "https://27c4ad23-b20f-41cf-b584-cd36c03b1a52.preview.emergentagent.com"
+    BASE_URL = "https://file-inspector-80.preview.emergentagent.com"
     SESSION_TOKEN = "test_session_corteqs"
     
     print("="*60)
@@ -634,6 +667,22 @@ def main():
     tester.test_github_connection()
     tester.test_neo4j_status()
     tester.test_elasticsearch_status()
+    
+    # Test 12a: Neo4j Stats and Graph Data
+    print("\n📊 Testing Neo4j Data...")
+    neo4j_stats_success, neo4j_stats = tester.test_neo4j_stats()
+    if neo4j_stats_success:
+        print(f"   Neo4j Stats: {neo4j_stats}")
+    
+    neo4j_graph_success, neo4j_graph = tester.test_neo4j_graph()
+    if neo4j_graph_success:
+        print(f"   Neo4j Graph: {len(neo4j_graph.get('nodes', []))} nodes, {len(neo4j_graph.get('edges', []))} edges")
+    
+    # Test 12b: Elasticsearch Stats
+    print("\n📊 Testing Elasticsearch Data...")
+    es_stats_success, es_stats = tester.test_elasticsearch_search_stats()
+    if es_stats_success:
+        print(f"   Elasticsearch Stats: {es_stats}")
     
     # Test 13: Data Sync (only if integrations are connected)
     if status_success and status_data.get('slack', {}).get('connected'):
