@@ -28,7 +28,7 @@ def test_health():
     assert r.status_code == 200
     data = r.json()
     assert data["status"] == "healthy"
-    assert data["version"] == "2.1.0"
+    assert data["version"] == "2.2.0"
     assert data["database"] == "supabase"
 
 
