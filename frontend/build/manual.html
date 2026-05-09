@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CorteQS Intelligence Engine - Kullanım Kılavuzu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #002FA7;
+            --primary-light: #1a4fd0;
+            --accent: #FF3B30;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --bg: #F4F4F5;
+            --surface: #FFFFFF;
+            --text: #09090B;
+            --text-muted: #71717A;
+            --border: #E4E4E7;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, #001a5c 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .header .version {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 15px;
+        }
+        
+        /* Navigation */
+        .nav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .nav a:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* Main Content */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* Sections */
+        .section {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+        }
+        
+        .section h2 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section h3 {
+            color: var(--text);
+            font-size: 1.15rem;
+            margin: 25px 0 15px 0;
+        }
+        
+        .section p {
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+        
+        /* Lists */
+        .section ul, .section ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .section li {
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+        
+        /* Info Boxes */
+        .info-box {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .info-box.tip {
+            background: #EFF6FF;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .info-box.warning {
+            background: #FFFBEB;
+            border-left: 4px solid var(--warning);
+        }
+        
+        .info-box.success {
+            background: #ECFDF5;
+            border-left: 4px solid var(--success);
+        }
+        
+        .info-box.danger {
+            background: #FEF2F2;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text);
+        }
+        
+        /* Code Blocks */
+        code {
+            background: #F1F5F9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9em;
+            color: var(--primary);
+        }
+        
+        pre {
+            background: #1E293B;
+            color: #E2E8F0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        th {
+            background: var(--bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        tr:hover {
+            background: #FAFAFA;
+        }
+        
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .feature-card .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .feature-card h4 {
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+        
+        .feature-card p {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        /* Steps */
+        .steps {
+            counter-reset: step;
+        }
+        
+        .step {
+            position: relative;
+            padding-left: 50px;
+            margin-bottom: 25px;
+        }
+        
+        .step::before {
+            counter-increment: step;
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 35px;
+            height: 35px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .step h4 {
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        
+        .step p {
+            margin: 0;
+        }
+        
+        /* Images */
+        .screenshot {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin: 15px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* Integration Icons */
+        .integrations {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .integration {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: var(--bg);
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .integration .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .nav a {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+        }
+        
+        /* Print Styles */
+        @media print {
+            .nav {
+                display: none;
+            }
+            
+            .header {
+                background: var(--primary);
+                -webkit-print-color-adjust: exact;
+            }
+            
+            .section {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1>CorteQS Intelligence Engine</h1>
+        <p class="subtitle">Kurumsal Hafıza ve AI-Destekli Karar Destek Platformu</p>
+        <span class="version">Versiyon 2.0 - Kullanım Kılavuzu</span>
+    </header>
+    
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="#giris">Giriş</a>
+            <a href="#baslangic">Başlangıç</a>
+            <a href="#dashboard">Dashboard</a>
+            <a href="#veri-kaynaklari">Veri Kaynakları</a>
+            <a href="#bilgi-grafi">Bilgi Grafiği</a>
+            <a href="#ai-asistan">AI Asistan</a>
+            <a href="#arama">Arama</a>
+            <a href="#analitik">Analitik</a>
+            <a href="#entegrasyonlar">Entegrasyonlar</a>
+            <a href="#credentials">API Anahtarları</a>
+            <a href="#sss">SSS</a>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="container">
+        
+        <!-- Giriş -->
+        <section id="giris" class="section">
+            <h2>📖 Giriş</h2>
+            <p>
+                <strong>CorteQS Intelligence Engine</strong>, kurumsal bilgilerinizi merkezi bir platformda toplayan, 
+                yapay zeka destekli arama ve analiz imkanı sunan bir "Kurumsal Hafıza" sistemidir.
+            </p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon">🔗</div>
+                    <h4>Veri Entegrasyonu</h4>
+                    <p>Slack, GitHub, Google Drive ve daha fazlasını bağlayın</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🕸️</div>
+                    <h4>Bilgi Grafiği</h4>
+                    <p>Veriler arası ilişkileri görselleştirin</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🤖</div>
+                    <h4>AI Asistan</h4>
+                    <p>Doğal dilde sorular sorun, anında cevap alın</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔍</div>
+                    <h4>Akıllı Arama</h4>
+                    <p>Tüm verilerinizde full-text arama yapın</p>
+                </div>
+            </div>
+            
+            <div class="info-box tip">
+                <strong>💡 İpucu</strong>
+                Bu platform, Gemini AI, Neo4j Graf Veritabanı ve Elasticsearch teknolojilerini kullanmaktadır.
+            </div>
+        </section>
+        
+        <!-- Başlangıç -->
+        <section id="baslangic" class="section">
+            <h2>🚀 Başlangıç</h2>
+            
+            <h3>Sisteme Giriş</h3>
+            <p>CorteQS'e giriş yapmak için Google hesabınızı kullanabilirsiniz.</p>
+            
+            <div class="steps">
+                <div class="step">
+                    <h4>Giriş Sayfasına Gidin</h4>
+                    <p>Tarayıcınızda <code>eng.corteqs.net</code> adresine gidin.</p>
+                </div>
+                <div class="step">
+                    <h4>Google ile Giriş Yapın</h4>
+                    <p>"Continue with Google" butonuna tıklayın ve Google hesabınızla oturum açın.</p>
+                </div>
+                <div class="step">
+                    <h4>Dashboard'a Yönlendirileceksiniz</h4>
+                    <p>Başarılı giriş sonrası otomatik olarak ana kontrol paneline yönlendirilirsiniz.</p>
+                </div>
+            </div>
+            
+            <div class="info-box success">
+                <strong>✅ Güvenli Giriş</strong>
+                Sistem, Google OAuth 2.0 kullanarak güvenli kimlik doğrulama sağlar. Şifreniz bizimle paylaşılmaz.
+            </div>
+        </section>
+        
+        <!-- Dashboard -->
+        <section id="dashboard" class="section">
+            <h2>📊 Dashboard (Kontrol Paneli)</h2>
+            <p>Dashboard, sistemin genel durumunu ve önemli metrikleri tek bakışta görmenizi sağlar.</p>
+            
+            <h3>Ana Bileşenler</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bileşen</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Knowledge Nodes</strong></td>
+                        <td>Bilgi grafiğindeki toplam düğüm sayısı (kişiler, projeler, dokümanlar, vb.)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data Sources</strong></td>
+                        <td>Bağlı veri kaynağı sayısı (Slack, GitHub, GDrive, vb.)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Connected</strong></td>
+                        <td>Aktif olarak bağlı ve senkronize edilen kaynak sayısı</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AI Messages</strong></td>
+                        <td>AI asistan ile yapılan toplam mesaj sayısı</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Hızlı Eylemler</h3>
+            <ul>
+                <li><strong>Connect Data Source:</strong> Yeni bir veri kaynağı bağlayın</li>
+                <li><strong>Explore Knowledge:</strong> Bilgi grafiğini keşfedin</li>
+                <li><strong>Ask AI Assistant:</strong> AI'a soru sorun</li>
+            </ul>
+            
+            <h3>Son Aktiviteler</h3>
+            <p>Dashboard'un sağ tarafında son yapılan işlemler (veri senkronizasyonu, arama sorguları, yeni düğümler) listelenir.</p>
+        </section>
+        
+        <!-- Veri Kaynakları -->
+        <section id="veri-kaynaklari" class="section">
+            <h2>🔗 Veri Kaynakları</h2>
+            <p>Veri Kaynakları sayfası, harici sistemlerle entegrasyonlarınızı yönetmenizi sağlar.</p>
+            
+            <h3>Desteklenen Entegrasyonlar</h3>
+            <div class="integrations">
+                <div class="integration">
+                    <span class="dot"></span>
+                    <span>Slack</span>
+                </div>
+                <div class="integration">
+                    <span class="dot"></span>
+                    <span>GitHub</span>
+                </div>
+                <div class="integration">
+                    <span class="dot"></span>
+                    <span>Google Drive</span>
+                </div>
+                <div class="integration">
+                    <span class="dot" style="background: var(--text-muted)"></span>
+                    <span>Email (Yakında)</span>
+                </div>
+                <div class="integration">
+                    <span class="dot" style="background: var(--text-muted)"></span>
+                    <span>WhatsApp (Yakında)</span>
+                </div>
+            </div>
+            
+            <h3>Veri Senkronizasyonu</h3>
+            <div class="steps">
+                <div class="step">
+                    <h4>Entegrasyon Kartını Bulun</h4>
+                    <p>"Live Integrations" bölümünde bağlı servislerinizi göreceksiniz.</p>
+                </div>
+                <div class="step">
+                    <h4>"Sync" Butonuna Tıklayın</h4>
+                    <p>Her entegrasyonun altındaki "Sync" butonuyla verileri çekin.</p>
+                </div>
+                <div class="step">
+                    <h4>Verilerin İşlenmesini Bekleyin</h4>
+                    <p>Veriler Neo4j ve Elasticsearch'e aktarılacaktır.</p>
+                </div>
+            </div>
+            
+            <div class="info-box warning">
+                <strong>⚠️ Google Drive Notu</strong>
+                Google Drive'dan veri çekmek için, dosyalarınızı service account ile paylaşmanız gerekir:
+                <br><br>
+                <code>corteqs-drive-sync@gen-lang-client-0322325978.iam.gserviceaccount.com</code>
+            </div>
+            
+            <h3>Yeni Kaynak Ekleme</h3>
+            <ol>
+                <li>"Add Source" butonuna tıklayın</li>
+                <li>Kaynak türünü seçin (Slack, GitHub, vb.)</li>
+                <li>Bağlantı adını girin</li>
+                <li>Gerekli izinleri verin</li>
+            </ol>
+        </section>
+        
+        <!-- Bilgi Grafiği -->
+        <section id="bilgi-grafi" class="section">
+            <h2>🕸️ Bilgi Grafiği (Knowledge Graph)</h2>
+            <p>Bilgi Grafiği, tüm verilerinizi düğümler ve ilişkiler olarak görselleştirir.</p>
+            
+            <h3>Düğüm Türleri</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tür</th>
+                        <th>Renk</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Person</strong></td>
+                        <td style="color: #002FA7">●</td>
+                        <td>Kişiler (Slack kullanıcıları, GitHub contributorlar)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Project</strong></td>
+                        <td style="color: #10B981">●</td>
+                        <td>Projeler (GitHub repoları, proje klasörleri)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Document</strong></td>
+                        <td style="color: #F59E0B">●</td>
+                        <td>Dokümanlar (dosyalar, issue'lar, PR'lar)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Event</strong></td>
+                        <td style="color: #EF4444">●</td>
+                        <td>Olaylar (toplantılar, milestone'lar)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Topic</strong></td>
+                        <td style="color: #8B5CF6">●</td>
+                        <td>Konular (klasörler, kanallar, etiketler)</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Yeni Düğüm Ekleme</h3>
+            <div class="steps">
+                <div class="step">
+                    <h4>"Add Node" Butonuna Tıklayın</h4>
+                    <p>Sağ üst köşedeki mavi butonu kullanın.</p>
+                </div>
+                <div class="step">
+                    <h4>Düğüm Türünü Seçin</h4>
+                    <p>Person, Project, Document, Event veya Topic seçin.</p>
+                </div>
+                <div class="step">
+                    <h4>Bilgileri Doldurun</h4>
+                    <p>Başlık ve isteğe bağlı olarak içerik girin.</p>
+                </div>
+                <div class="step">
+                    <h4>"Create Node" ile Kaydedin</h4>
+                    <p>Düğüm hem Neo4j'e hem Elasticsearch'e eklenir.</p>
+                </div>
+            </div>
+            
+            <h3>Grafik Etkileşimi</h3>
+            <ul>
+                <li><strong>Düğüme Tıklama:</strong> Detayları sağ panelde görüntüleyin</li>
+                <li><strong>Hover:</strong> Düğüm adını görün</li>
+                <li><strong>Liste Görünümü:</strong> Sağ panelde tüm düğümleri listeleyin</li>
+            </ul>
+        </section>
+        
+        <!-- AI Asistan -->
+        <section id="ai-asistan" class="section">
+            <h2>🤖 AI Asistan</h2>
+            <p>AI Asistan, kurumsal bilgi tabanınız hakkında doğal dilde sorular sormanızı sağlar.</p>
+            
+            <h3>Nasıl Kullanılır?</h3>
+            <div class="steps">
+                <div class="step">
+                    <h4>Soru Yazın</h4>
+                    <p>Alt kısımdaki metin kutusuna sorunuzu yazın.</p>
+                </div>
+                <div class="step">
+                    <h4>Enter veya Gönder Butonuna Basın</h4>
+                    <p>Sorunuz AI'a iletilir.</p>
+                </div>
+                <div class="step">
+                    <h4>Cevabı Okuyun</h4>
+                    <p>AI, bilgi tabanınıza dayanarak cevap verir.</p>
+                </div>
+            </div>
+            
+            <h3>Örnek Sorular</h3>
+            <ul>
+                <li>"Hangi veri kaynakları bağlı?"</li>
+                <li>"Son aktiviteleri özetle"</li>
+                <li>"CorteQS projesi hakkında bilgi ver"</li>
+                <li>"Marketing klasöründe neler var?"</li>
+                <li>"GitHub'daki açık issue'ları listele"</li>
+                <li>"Kim hangi projede çalışıyor?"</li>
+            </ul>
+            
+            <div class="info-box tip">
+                <strong>💡 İpucu</strong>
+                AI, Gemini 2.5 Pro modeli kullanır ve cevaplarını bilgi tabanınızdaki verilere dayandırır.
+                Ne kadar çok veri senkronize ederseniz, AI o kadar kapsamlı cevaplar verebilir.
+            </div>
+            
+            <h3>Sohbet Geçmişi</h3>
+            <p>Tüm sohbetleriniz kaydedilir. "Clear History" butonu ile geçmişi temizleyebilirsiniz.</p>
+        </section>
+        
+        <!-- Arama -->
+        <section id="arama" class="section">
+            <h2>🔍 Arama</h2>
+            <p>Elasticsearch ile desteklenen güçlü full-text arama özelliği.</p>
+            
+            <h3>Arama Özellikleri</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Özellik</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Full-Text Search</strong></td>
+                        <td>Tüm içeriklerde tam metin araması</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fuzzy Matching</strong></td>
+                        <td>Yazım hatalarına toleranslı arama</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Autocomplete</strong></td>
+                        <td>Yazarken öneri gösterimi</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Filtreleme</strong></td>
+                        <td>Düğüm türü ve kaynağa göre filtreleme</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Arama Nasıl Yapılır?</h3>
+            <ol>
+                <li>Header'daki arama kutusuna yazın (global arama)</li>
+                <li>Veya AI Asistan'a "X'i ara" şeklinde sorun</li>
+                <li>Sonuçlar kaynak ve türe göre gruplandırılır</li>
+            </ol>
+            
+            <h3>Arama İpuçları</h3>
+            <ul>
+                <li>Spesifik terimler kullanın: "Q1 2024 raporu" yerine sadece "rapor" değil</li>
+                <li>Kişi adları, proje adları veya dosya adları ile arayın</li>
+                <li>Türkçe ve İngilizce aramalar desteklenir</li>
+            </ul>
+        </section>
+        
+        <!-- Analitik -->
+        <section id="analitik" class="section">
+            <h2>📈 Analitik</h2>
+            <p>Analitik sayfası, kurumsal hafızanızın istatistiklerini ve dağılımını gösterir.</p>
+            
+            <h3>Metrikler</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon">📊</div>
+                    <h4>Total Nodes</h4>
+                    <p>Bilgi grafiğindeki toplam düğüm</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔗</div>
+                    <h4>Data Sources</h4>
+                    <p>Bağlı kaynak sayısı</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">✅</div>
+                    <h4>Connected</h4>
+                    <p>Aktif bağlantılar</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">💬</div>
+                    <h4>AI Queries</h4>
+                    <p>Toplam AI sorgusu</p>
+                </div>
+            </div>
+            
+            <h3>Knowledge Distribution</h3>
+            <p>Düğümlerin türlere göre dağılımını gösteren grafik:</p>
+            <ul>
+                <li>Person (Kişiler)</li>
+                <li>Project (Projeler)</li>
+                <li>Document (Dokümanlar)</li>
+                <li>Topic (Konular)</li>
+                <li>Event (Olaylar)</li>
+            </ul>
+            
+            <h3>Recent Activity</h3>
+            <p>Son yapılan işlemlerin zaman damgalı listesi.</p>
+        </section>
+        
+        <!-- Entegrasyonlar -->
+        <section id="entegrasyonlar" class="section">
+            <h2>⚙️ Entegrasyon Kurulumları ve API Anahtarları</h2>
+            <p>CorteQS Intelligence Engine, kurumsal verilerinizi toplamak için çeşitli harici servislerle entegre çalışır. 
+            Bu bölümde her bir entegrasyon için gerekli API anahtarları, ne işe yaradıkları ve nasıl alınacakları detaylı olarak açıklanmaktadır.</p>
+            
+            <div class="info-box tip">
+                <strong>🔐 Güvenlik Notu</strong>
+                Tüm API anahtarları sunucu tarafında güvenli bir şekilde saklanır ve asla istemci tarafına gönderilmez.
+                Anahtarlarınızı kimseyle paylaşmayın.
+            </div>
+        </section>
+
+        <!-- Slack Detaylı -->
+        <section class="section">
+            <h2>💬 Slack Entegrasyonu</h2>
+            
+            <h3>Ne İşe Yarar?</h3>
+            <p>Slack entegrasyonu, workspace'inizdeki iletişim verilerini CorteQS'e aktarır:</p>
+            <ul>
+                <li><strong>Kullanıcılar:</strong> Tüm workspace üyeleri "Person" düğümü olarak kaydedilir</li>
+                <li><strong>Kanallar:</strong> Public ve private kanallar "Topic" düğümü olarak eklenir</li>
+                <li><strong>Mesajlar:</strong> Kanal mesajları "Document" düğümü olarak indekslenir</li>
+                <li><strong>İlişkiler:</strong> Kim hangi kanalda yazdı, kim kime cevap verdi gibi bağlantılar kurulur</li>
+            </ul>
+            
+            <h3>Neden Gerekli?</h3>
+            <p>Kurumsal iletişiminizi aranabilir ve analiz edilebilir hale getirir. AI Asistan'a 
+            "Geçen hafta marketing kanalında ne konuşuldu?" gibi sorular sorabilirsiniz.</p>
+            
+            <h3>Gerekli Credential</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Değişken</th>
+                        <th>Format</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>SLACK_BOT_TOKEN</code></td>
+                        <td><code>xoxb-...</code> veya <code>xoxe-...</code></td>
+                        <td>Slack Bot User OAuth Token</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Nasıl Alınır?</h3>
+            <div class="steps">
+                <div class="step">
+                    <h4>Slack API Sayfasına Gidin</h4>
+                    <p><a href="https://api.slack.com/apps" target="_blank">https://api.slack.com/apps</a> adresine gidin.</p>
+                </div>
+                <div class="step">
+                    <h4>Yeni App Oluşturun</h4>
+                    <p>"Create New App" → "From scratch" seçin. App adı ve workspace belirleyin.</p>
+                </div>
+                <div class="step">
+                    <h4>OAuth & Permissions Ayarlayın</h4>
+                    <p>Sol menüden "OAuth & Permissions" seçin. "Bot Token Scopes" altına şu izinleri ekleyin:</p>
+                    <ul>
+                        <li><code>channels:history</code> - Kanal mesajlarını okuma</li>
+                        <li><code>channels:read</code> - Kanal listesini görme</li>
+                        <li><code>users:read</code> - Kullanıcı bilgilerini okuma</li>
+                        <li><code>users:read.email</code> - Email adreslerini okuma</li>
+                        <li><code>files:read</code> - Paylaşılan dosyaları okuma</li>
+                    </ul>
+                </div>
+                <div class="step">
+                    <h4>Workspace'e Yükleyin</h4>
+                    <p>"Install to Workspace" butonuna tıklayın ve izinleri onaylayın.</p>
+                </div>
+                <div class="step">
+                    <h4>Token'ı Kopyalayın</h4>
+                    <p>"Bot User OAuth Token" değerini kopyalayın. <code>xoxb-</code> ile başlar.</p>
+                </div>
+            </div>
+            
+            <div class="info-box warning">
+                <strong>⚠️ Kanal Erişimi</strong>
+                Bot'un mesajları okuyabilmesi için ilgili kanallara eklenmesi gerekir. 
+                Public kanallar için bot'u kanala davet edin: <code>/invite @botadı</code>
+            </div>
+        </section>
+
+        <!-- GitHub Detaylı -->
+        <section class="section">
+            <h2>🐙 GitHub Entegrasyonu</h2>
+            
+            <h3>Ne İşe Yarar?</h3>
+            <p>GitHub entegrasyonu, kod tabanınız ve proje yönetimi verilerinizi CorteQS'e aktarır:</p>
+            <ul>
+                <li><strong>Repository'ler:</strong> Tüm repo'larınız "Project" düğümü olarak kaydedilir</li>
+                <li><strong>Issue'lar:</strong> Açık/kapalı issue'lar "Document" düğümü olarak eklenir</li>
+                <li><strong>Pull Request'ler:</strong> PR'lar "Document" düğümü olarak indekslenir</li>
+                <li><strong>Contributor'lar:</strong> Katkıda bulunanlar "Person" düğümü olarak eklenir</li>
+                <li><strong>Commit'ler:</strong> Commit mesajları ve geçmişi analiz edilir</li>
+            </ul>
+            
+            <h3>Neden Gerekli?</h3>
+            <p>Kod tabanınızı ve proje geçmişinizi aranabilir hale getirir. "Bu özellik hangi PR ile eklendi?", 
+            "Kim bu modülde en çok çalıştı?" gibi sorulara cevap bulabilirsiniz.</p>
+            
+            <h3>Gerekli Credential</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Değişken</th>
+                        <th>Format</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>GITHUB_TOKEN</code></td>
+                        <td><code>ghp_...</code> veya <code>github_pat_...</code></td>
+                        <td>Personal Access Token</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Nasıl Alınır?</h3>
+            <div class="steps">
+                <div class="step">
+                    <h4>GitHub Settings'e Gidin</h4>
+                    <p><a href="https://github.com/settings/tokens" target="_blank">https://github.com/settings/tokens</a> adresine gidin.</p>
+                </div>
+                <div class="step">
+                    <h4>Yeni Token Oluşturun</h4>
+                    <p>"Generate new token" → "Fine-grained tokens (Beta)" seçin.</p>
+                </div>
+                <div class="step">
+                    <h4>Token Ayarlarını Yapın</h4>
+                    <ul>
+                        <li><strong>Token name:</strong> "CorteQS Integration"</li>
+                        <li><strong>Expiration:</strong> 90 gün veya daha uzun</li>
+                        <li><strong>Repository access:</strong> "All repositories" veya spesifik repo'lar</li>
+                    </ul>
+                </div>
+                <div class="step">
+                    <h4>İzinleri Seçin</h4>
+                    <p>"Repository permissions" altında:</p>
+                    <ul>
+                        <li><code>Contents: Read</code> - Dosya içeriklerini okuma</li>
+                        <li><code>Issues: Read</code> - Issue'ları okuma</li>
+                        <li><code>Pull requests: Read</code> - PR'ları okuma</li>
+                        <li><code>Metadata: Read</code> - Repo bilgilerini okuma</li>
+                    </ul>
+                </div>
+                <div class="step">
+                    <h4>Token'ı Oluşturun ve Kopyalayın</h4>
+                    <p>"Generate token" tıklayın. Token sadece bir kez gösterilir, hemen kopyalayın!</p>
+                </div>
+            </div>
+            
+            <div class="info-box tip">
+                <strong>💡 İpucu</strong>
+                Fine-grained token'lar daha güvenlidir çünkü sadece belirli repo'lara ve izinlere erişim verirsiniz.
+            </div>
+        </section>
+
+        <!-- Google Drive Detaylı -->
+        <section class="section">
+            <h2>📁 Google Drive Entegrasyonu</h2>
+            
+            <h3>Ne İşe Yarar?</h3>
+            <p>Google Drive entegrasyonu, bulut depolamanızdaki dokümanları CorteQS'e aktarır:</p>
+            <ul>
+                <li><strong>Klasörler:</strong> Drive klasörleri "Topic" düğümü olarak kaydedilir</li>
+                <li><strong>Dokümanlar:</strong> Google Docs, Sheets, Slides "Document" düğümü olarak eklenir</li>
+                <li><strong>İçerik Çıkarımı:</strong> Doküman içerikleri otomatik olarak okunur ve indekslenir</li>
+                <li><strong>Paylaşım Bilgileri:</strong> Kim kiminle ne paylaşmış analiz edilir</li>
+            </ul>
+            
+            <h3>Neden Gerekli?</h3>
+            <p>Kurumsal dokümanlarınızı merkezi olarak aranabilir hale getirir. "Marketing planı nerede?", 
+            "2024 bütçe tablosu kim tarafından hazırlandı?" gibi sorulara cevap bulabilirsiniz.</p>
+            
+            <h3>Gerekli Credential</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Değişken</th>
+                        <th>Format</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>GOOGLE_SERVICE_ACCOUNT_JSON</code></td>
+                        <td>JSON dosyası</td>
+                        <td>Service Account credentials</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Nasıl Alınır?</h3>
+            <div class="steps">
+                <div class="step">
+                    <h4>Google Cloud Console'a Gidin</h4>
+                    <p><a href="https://console.cloud.google.com" target="_blank">https://console.cloud.google.com</a> adresine gidin.</p>
+                </div>
+                <div class="step">
+                    <h4>Proje Oluşturun veya Seçin</h4>
+                    <p>Yeni bir proje oluşturun veya mevcut projeyi seçin.</p>
+                </div>
+                <div class="step">
+                    <h4>Google Drive API'yi Etkinleştirin</h4>
+                    <p>"APIs & Services" → "Enable APIs" → "Google Drive API" arayın ve etkinleştirin.</p>
+                </div>
+                <div class="step">
+                    <h4>Service Account Oluşturun</h4>
+                    <p>"APIs & Services" → "Credentials" → "Create Credentials" → "Service Account"</p>
+                    <ul>
+                        <li>Service account adı girin (örn: "corteqs-drive-sync")</li>
+                        <li>"Create and Continue" tıklayın</li>
+                        <li>Role seçmeden "Done" tıklayın</li>
+                    </ul>
+                </div>
+                <div class="step">
+                    <h4>JSON Key Oluşturun</h4>
+                    <p>Oluşturulan service account'a tıklayın → "Keys" sekmesi → "Add Key" → "Create new key" → "JSON"</p>
+                    <p>İndirilen JSON dosyası sizin credential'ınızdır.</p>
+                </div>
+            </div>
+            
+            <div class="info-box danger">
+                <strong>🔴 Kritik Adım: Dosya Paylaşımı</strong>
+                Service account, Google Drive'ınıza otomatik erişemez. Erişmesini istediğiniz dosya/klasörleri 
+                şu email adresiyle paylaşmanız <strong>zorunludur</strong>:
+                <br><br>
+                <code style="background: #1E293B; color: #E2E8F0; padding: 10px; display: block; border-radius: 4px;">
+                    corteqs-drive-sync@gen-lang-client-0322325978.iam.gserviceaccount.com
+                </code>
+                <br>
+                <strong>Paylaşım Adımları:</strong>
+                <ol>
+                    <li>Google Drive'da klasör/dosyaya sağ tıklayın</li>
+                    <li>"Paylaş" seçin</li>
+                    <li>Yukarıdaki email'i yapıştırın</li>
+                    <li>"Görüntüleyici" izni verin</li>
+                    <li>"Gönder" tıklayın</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Neo4j Detaylı -->
+        <section class="section">
+            <h2>🕸️ Neo4j Aura (Graf Veritabanı)</h2>
+            
+            <h3>Ne İşe Yarar?</h3>
+            <p>Neo4j, CorteQS'in "beyni"dir - tüm bilgi grafiğini saklar ve yönetir:</p>
+            <ul>
+                <li><strong>Düğümler (Nodes):</strong> Kişiler, projeler, dokümanlar, konular</li>
+                <li><strong>İlişkiler (Edges):</strong> Kim kime bağlı, ne neyle ilişkili</li>
+                <li><strong>Graf Sorguları:</strong> "A kişisi hangi projelerde çalıştı?" gibi karmaşık sorgular</li>
+                <li><strong>Graf Algoritmaları:</strong> PageRank, Community Detection, Shortest Path</li>
+            </ul>
+            
+            <h3>Neden Gerekli?</h3>
+            <p>İlişkisel veritabanları (MySQL, PostgreSQL) ilişkileri verimli sorgulayamaz. 
+            Neo4j, "3 adım uzaklıktaki tüm bağlantıları bul" gibi sorguları milisaniyede çözer.</p>
+            
+            <h3>Gerekli Credentials</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Değişken</th>
+                        <th>Format</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>NEO4J_URI</code></td>
+                        <td><code>neo4j+s://xxxxx.databases.neo4j.io</code></td>
+                        <td>Bağlantı adresi</td>
+                    </tr>
+                    <tr>
+                        <td><code>NEO4J_USER</code></td>
+                        <td><code>neo4j</code></td>
+                        <td>Kullanıcı adı (genellikle "neo4j")</td>
+                    </tr>
+                    <tr>
+                        <td><code>NEO4J_PASSWORD</code></td>
+                        <td>Rastgele string</td>
+                        <td>Veritabanı şifresi</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Nasıl Alınır?</h3>
+            <div class="steps">
+                <div class="step">
+                    <h4>Neo4j Aura'ya Gidin</h4>
+                    <p><a href="https://neo4j.com/cloud/aura/" target="_blank">https://neo4j.com/cloud/aura/</a> adresine gidin.</p>
+                </div>
+                <div class="step">
+                    <h4>Ücretsiz Hesap Oluşturun</h4>
+                    <p>"Start Free" ile kayıt olun. Free tier aylık 200k node destekler.</p>
+                </div>
+                <div class="step">
+                    <h4>Yeni Database Oluşturun</h4>
+                    <p>"Create Database" → Database adı girin (örn: "corteqs") → Region seçin → "Create"</p>
+                </div>
+                <div class="step">
+                    <h4>Credentials'ı Kaydedin</h4>
+                    <p>Database oluşturulduktan sonra şifre <strong>sadece bir kez</strong> gösterilir!</p>
+                    <ul>
+                        <li>Connection URI</li>
+                        <li>Username (neo4j)</li>
+                        <li>Password</li>
+                    </ul>
+                    <p>Hemen not edin veya ".env credentials" dosyasını indirin.</p>
+                </div>
+            </div>
+            
+            <div class="info-box warning">
+                <strong>⚠️ Şifre Uyarısı</strong>
+                Neo4j Aura şifreyi sadece database oluşturulduğunda gösterir. Kaybederseniz şifreyi sıfırlamanız gerekir.
+            </div>
+        </section>
+
+        <!-- Elasticsearch Detaylı -->
+        <section class="section">
+            <h2>🔍 Elasticsearch Cloud (Arama Motoru)</h2>
+            
+            <h3>Ne İşe Yarar?</h3>
+            <p>Elasticsearch, CorteQS'in "arama motoru"dur - tüm içeriklerde hızlı arama sağlar:</p>
+            <ul>
+                <li><strong>Full-Text Search:</strong> Tüm doküman içeriklerinde arama</li>
+                <li><strong>Fuzzy Matching:</strong> Yazım hatalarına toleranslı arama ("proje" yerine "porje" yazsan da bulur)</li>
+                <li><strong>Autocomplete:</strong> Yazarken öneri gösterimi</li>
+                <li><strong>Highlighting:</strong> Bulunan kelimeleri vurgulama</li>
+                <li><strong>Aggregations:</strong> İstatistik ve gruplama</li>
+            </ul>
+            
+            <h3>Neden Gerekli?</h3>
+            <p>Neo4j yapısal sorgular için mükemmeldir ama metin araması için değil. 
+            Elasticsearch, milyonlarca doküman içinde milisaniyede arama yapabilir.</p>
+            
+            <h3>Gerekli Credentials</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Değişken</th>
+                        <th>Format</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>ELASTICSEARCH_CLOUD_ID</code></td>
+                        <td><code>deployment:base64string</code></td>
+                        <td>Cloud deployment kimliği</td>
+                    </tr>
+                    <tr>
+                        <td><code>ELASTICSEARCH_API_KEY</code></td>
+                        <td>Base64 encoded string</td>
+                        <td>API erişim anahtarı</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Nasıl Alınır?</h3>
+            <div class="steps">
+                <div class="step">
+                    <h4>Elastic Cloud'a Gidin</h4>
+                    <p><a href="https://cloud.elastic.co" target="_blank">https://cloud.elastic.co</a> adresine gidin.</p>
+                </div>
+                <div class="step">
+                    <h4>Ücretsiz Trial Başlatın</h4>
+                    <p>14 günlük ücretsiz deneme ile başlayın. Kredi kartı gerekmez.</p>
+                </div>
+                <div class="step">
+                    <h4>Deployment Oluşturun</h4>
+                    <p>"Create deployment" → Deployment adı girin → Region seçin → "Create deployment"</p>
+                </div>
+                <div class="step">
+                    <h4>Cloud ID'yi Alın</h4>
+                    <p>Deployment oluştuktan sonra "Manage" → Overview sayfasında "Cloud ID" görünür.</p>
+                </div>
+                <div class="step">
+                    <h4>API Key Oluşturun</h4>
+                    <p>"Security" → "API Keys" → "Create API Key"</p>
+                    <ul>
+                        <li>Name girin (örn: "corteqs-access")</li>
+                        <li>"Create API Key" tıklayın</li>
+                        <li><strong>Encoded</strong> değerini kopyalayın (Base64 formatında)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="info-box tip">
+                <strong>💡 İpucu</strong>
+                Elastic Cloud 14 gün sonra ücretli olur. Alternatif olarak self-hosted Elasticsearch da kullanılabilir,
+                ancak yönetimi daha zordur.
+            </div>
+        </section>
+
+        <!-- Özet Tablo -->
+        <section class="section">
+            <h2>📋 Tüm Credentials Özet Tablosu</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Servis</th>
+                        <th>Credential</th>
+                        <th>Nereden Alınır</th>
+                        <th>Ne İçin Kullanılır</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Slack</strong></td>
+                        <td>Bot Token</td>
+                        <td>api.slack.com/apps</td>
+                        <td>Workspace mesaj ve kullanıcıları</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GitHub</strong></td>
+                        <td>Personal Access Token</td>
+                        <td>github.com/settings/tokens</td>
+                        <td>Repo, issue, PR verileri</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Google Drive</strong></td>
+                        <td>Service Account JSON</td>
+                        <td>console.cloud.google.com</td>
+                        <td>Drive dosya ve klasörleri</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Neo4j</strong></td>
+                        <td>URI + User + Password</td>
+                        <td>neo4j.com/cloud/aura</td>
+                        <td>Graf veritabanı (node/edge)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Elasticsearch</strong></td>
+                        <td>Cloud ID + API Key</td>
+                        <td>cloud.elastic.co</td>
+                        <td>Full-text arama indeksi</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="info-box success">
+                <strong>✅ Mevcut Durum</strong>
+                Tüm entegrasyonlar aktif ve çalışır durumda:
+                <ul style="margin-top: 10px;">
+                    <li>✅ Slack - CorteQS workspace bağlı</li>
+                    <li>✅ GitHub - Repository'ler senkronize</li>
+                    <li>✅ Google Drive - Klasörler senkronize</li>
+                    <li>✅ Neo4j - 52 node aktif</li>
+                    <li>✅ Elasticsearch - 42 doküman indeksli</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- SSS -->
+        <section id="sss" class="section">
+            <h2>❓ Sıkça Sorulan Sorular</h2>
+            
+            <h3>Verilerim güvende mi?</h3>
+            <p>Evet. Tüm veriler şifreli bağlantılar üzerinden iletilir ve güvenli cloud altyapılarında saklanır. 
+            Google OAuth kullanıldığı için şifreniz bizimle paylaşılmaz.</p>
+            
+            <h3>Hangi dosya türleri destekleniyor?</h3>
+            <p>Google Docs, Sheets, Slides tam içerik çıkarımı destekler. PDF, DOCX, TXT dosyaları yüklenebilir 
+            ve AI ile analiz edilebilir.</p>
+            
+            <h3>Ne kadar veri saklayabilirim?</h3>
+            <p>Pratik bir sınır yoktur. Neo4j ve Elasticsearch cloud altyapıları ölçeklenebilir şekilde çalışır.</p>
+            
+            <h3>AI yanıtları doğru mu?</h3>
+            <p>AI, sadece bilgi tabanınızdaki verilere dayanarak cevap verir. Ne kadar çok kaliteli veri eklerseniz, 
+            cevaplar o kadar doğru ve kapsamlı olur.</p>
+            
+            <h3>Slack mesajlarım neden görünmüyor?</h3>
+            <p>Slack bot'unuzun ilgili kanallara erişim izni olmalıdır. Bot'u kanallara ekleyin veya 
+            public channel erişimi verin.</p>
+            
+            <h3>Google Drive dosyalarım neden görünmüyor?</h3>
+            <p>Dosyalarınızı service account email'i ile paylaşmanız gerekir. 
+            Paylaştıktan sonra "Sync" butonuna basın.</p>
+            
+            <h3>Destek nasıl alabilirim?</h3>
+            <p>AI Asistan'a sorularınızı sorabilir veya teknik destek için 
+            <a href="mailto:support@corteqs.net">support@corteqs.net</a> adresine yazabilirsiniz.</p>
+        </section>
+        
+        <!-- Kısayollar -->
+        <section class="section">
+            <h2>⌨️ Hızlı Referans</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Eylem</th>
+                        <th>Nasıl Yapılır</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Hızlı Arama</td>
+                        <td>Header'daki arama kutusuna yazın</td>
+                    </tr>
+                    <tr>
+                        <td>AI'a Soru Sor</td>
+                        <td>Sol menüden "AI Assistant"a gidin</td>
+                    </tr>
+                    <tr>
+                        <td>Veri Senkronize Et</td>
+                        <td>Data Sources → İlgili servisin "Sync" butonu</td>
+                    </tr>
+                    <tr>
+                        <td>Yeni Düğüm Ekle</td>
+                        <td>Knowledge Graph → "Add Node" butonu</td>
+                    </tr>
+                    <tr>
+                        <td>Çıkış Yap</td>
+                        <td>Sol menü alt kısmında "Sign Out"</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <p><strong>CorteQS Intelligence Engine</strong></p>
+        <p>Versiyon 2.0 | © 2024-2026 CorteQS</p>
+        <p style="margin-top: 10px; font-size: 0.85rem;">
+            Bu kılavuz <a href="https://eng.corteqs.net">eng.corteqs.net</a> için hazırlanmıştır.
+        </p>
+    </footer>
+    
+    <!-- Smooth Scroll Script -->
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
