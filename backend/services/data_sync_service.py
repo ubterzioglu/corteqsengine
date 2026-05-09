@@ -311,76 +311,128 @@ class DataSyncService:
         
         return status
     
-    async def sync_gdrive_data(self, user_id: str, folder_id: str = None) -> Dict[str, Any]:
-        """Sync Google Drive data to knowledge graph"""
+    async def sync_gdrive_data(
+        self,
+        user_id: str,
+        folder_id: str = None,
+        recursive: bool = True,
+        max_depth: int = 5,
+        page_size: int = 100,
+    ) -> Dict[str, Any]:
+        """Sync Google Drive data to knowledge graph (optionally recursive into subfolders)."""
         if not gdrive_service.is_configured:
             return {"success": False, "error": "Google Drive not configured"}
-        
-        stats = {"files": 0, "folders": 0, "documents_extracted": 0}
-        
+
+        stats = {"files": 0, "folders": 0, "documents_extracted": 0, "max_depth_reached": 0}
+        visited: set = set()
+
         try:
-            # Get files from Drive
-            files = gdrive_service.list_files(folder_id=folder_id, page_size=30)
-            
-            for file in files:
-                try:
-                    file_node_id = f"gdrive_file_{file['id']}"
-                    
-                    # Determine node type
-                    if file['is_folder']:
-                        node_type = "topic"
-                        stats["folders"] += 1
-                    else:
-                        node_type = "document"
-                        stats["files"] += 1
-                    
-                    # Get content for documents
-                    content = ""
-                    if not file['is_folder'] and file['mime_type'] in [
-                        'application/vnd.google-apps.document',
-                        'application/vnd.google-apps.spreadsheet',
-                        'application/vnd.google-apps.presentation'
-                    ]:
-                        content = gdrive_service.get_file_content(file['id'], file['mime_type']) or ""
-                        if content:
-                            stats["documents_extracted"] += 1
-                    
-                    # Create in Neo4j
-                    if neo4j_service.driver:
-                        await neo4j_service.create_node(
-                            node_id=file_node_id,
-                            node_type=node_type,
-                            title=file['name'],
-                            content=content[:5000] if content else f"Google Drive file: {file['name']}",
-                            metadata={
-                                "gdrive_id": file['id'],
-                                "mime_type": file['mime_type'],
-                                "web_link": file.get('web_link'),
-                                "owners": file.get('owners', []),
-                                "modified_at": file.get('modified_at')
-                            },
-                            user_id=user_id
-                        )
-                    
-                    # Index in Elasticsearch
-                    if elasticsearch_service.client:
-                        await elasticsearch_service.index_node(
-                            node_id=file_node_id,
-                            user_id=user_id,
-                            node_type=node_type,
-                            title=file['name'],
-                            content=content[:10000] if content else f"Google Drive file: {file['name']}",
-                            source_type="gdrive",
-                            tags=["gdrive", file['mime_type'].split('.')[-1] if '.' in file['mime_type'] else "file"]
-                        )
-                        
-                except Exception as e:
-                    print(f"Error syncing GDrive file {file.get('name')}: {e}")
-            
+            await self._sync_gdrive_folder(
+                user_id=user_id,
+                folder_id=folder_id,
+                parent_node_id=None,
+                depth=0,
+                max_depth=max_depth if recursive else 0,
+                page_size=page_size,
+                stats=stats,
+                visited=visited,
+            )
             return {"success": True, "stats": stats}
-        
         except Exception as e:
             return {"success": False, "error": str(e), "stats": stats}
+
+    async def _sync_gdrive_folder(
+        self,
+        user_id: str,
+        folder_id: Optional[str],
+        parent_node_id: Optional[str],
+        depth: int,
+        max_depth: int,
+        page_size: int,
+        stats: Dict[str, int],
+        visited: set,
+    ) -> None:
+        """Sync all files in a single folder, recursing into subfolders up to max_depth."""
+        if folder_id and folder_id in visited:
+            return
+        if folder_id:
+            visited.add(folder_id)
+
+        if depth > stats.get("max_depth_reached", 0):
+            stats["max_depth_reached"] = depth
+
+        files = gdrive_service.list_files(folder_id=folder_id, page_size=page_size)
+
+        for file in files:
+            try:
+                file_node_id = f"gdrive_file_{file['id']}"
+                is_folder = file["is_folder"]
+
+                if is_folder:
+                    node_type = "topic"
+                    stats["folders"] += 1
+                else:
+                    node_type = "document"
+                    stats["files"] += 1
+
+                # Extract textual content for Google-native docs (skip folders & binaries)
+                content = ""
+                if not is_folder and file["mime_type"] in (
+                    "application/vnd.google-apps.document",
+                    "application/vnd.google-apps.spreadsheet",
+                    "application/vnd.google-apps.presentation",
+                ):
+                    content = gdrive_service.get_file_content(file["id"], file["mime_type"]) or ""
+                    if content:
+                        stats["documents_extracted"] += 1
+
+                if neo4j_service.driver:
+                    await neo4j_service.create_node(
+                        node_id=file_node_id,
+                        node_type=node_type,
+                        title=file["name"],
+                        content=content[:5000] if content else f"Google Drive {'folder' if is_folder else 'file'}: {file['name']}",
+                        metadata={
+                            "gdrive_id": file["id"],
+                            "mime_type": file["mime_type"],
+                            "web_link": file.get("web_link"),
+                            "owners": file.get("owners", []),
+                            "modified_at": file.get("modified_at"),
+                            "depth": depth,
+                        },
+                        user_id=user_id,
+                    )
+                    if parent_node_id:
+                        await neo4j_service.create_relationship(
+                            file_node_id, parent_node_id, "CONTAINED_IN"
+                        )
+
+                if elasticsearch_service.client:
+                    await elasticsearch_service.index_node(
+                        node_id=file_node_id,
+                        user_id=user_id,
+                        node_type=node_type,
+                        title=file["name"],
+                        content=content[:10000] if content else f"Google Drive {'folder' if is_folder else 'file'}: {file['name']}",
+                        source_type="gdrive",
+                        tags=["gdrive", "folder" if is_folder else (file["mime_type"].split(".")[-1] if "." in file["mime_type"] else "file")],
+                    )
+
+                # Recurse into subfolder
+                if is_folder and depth < max_depth:
+                    await self._sync_gdrive_folder(
+                        user_id=user_id,
+                        folder_id=file["id"],
+                        parent_node_id=file_node_id,
+                        depth=depth + 1,
+                        max_depth=max_depth,
+                        page_size=page_size,
+                        stats=stats,
+                        visited=visited,
+                    )
+
+            except Exception as e:
+                print(f"Error syncing GDrive item {file.get('name')}: {e}")
 
 
 # Singleton instance

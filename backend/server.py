@@ -702,25 +702,81 @@ async def search_gdrive_files(q: str = Query(..., min_length=2), user: User = De
 
 
 @app.post("/api/integrations/gdrive/sync")
-async def sync_gdrive_data(folder_id: Optional[str] = None, user: User = Depends(get_current_user)):
+async def sync_gdrive_data(
+    folder_id: Optional[str] = None,
+    recursive: bool = Query(default=True, description="Recursively sync subfolders"),
+    max_depth: int = Query(default=5, ge=0, le=20, description="Max recursion depth (0 = current folder only)"),
+    wait: bool = Query(default=False, description="If true, wait for sync to complete (may exceed proxy timeout)"),
+    user: User = Depends(get_current_user),
+):
+    """Start a Google Drive sync. Returns immediately with status='started'
+    unless `wait=true`. Recursive syncs of large folder trees can exceed the
+    60s ingress timeout, so we run them as a background task by default.
+    Poll `GET /api/data-sources` to see when `last_sync` gets updated."""
     sb = get_supabase()
-    result = await data_sync_service.sync_gdrive_data(user.user_id, folder_id)
+    source_id = f"src_gdrive_{user.user_id}"
+    started_at = datetime.now(timezone.utc).isoformat()
 
-    if result.get("success"):
-        await log_activity(user.user_id, "gdrive_sync", f"Synced Google Drive data: {result.get('stats')}")
-        source_id = f"src_gdrive_{user.user_id}"
-        await sb.from_("data_sources").upsert({
-            "source_id": source_id,
-            "user_id": user.user_id,
-            "source_type": "gdrive",
-            "name": "Google Drive",
-            "status": "connected",
-            "last_sync": datetime.now(timezone.utc).isoformat(),
-            "config": {},
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        }, on_conflict="user_id,source_type").execute()
+    # Mark source as syncing
+    await sb.from_("data_sources").upsert({
+        "source_id": source_id,
+        "user_id": user.user_id,
+        "source_type": "gdrive",
+        "name": "Google Drive",
+        "status": "syncing",
+        "last_sync": started_at,
+        "config": {
+            "recursive": recursive,
+            "max_depth": max_depth,
+            "folder_id": folder_id,
+            "started_at": started_at,
+        },
+        "created_at": started_at,
+    }, on_conflict="user_id,source_type").execute()
 
-    return result
+    async def run_sync():
+        result = await data_sync_service.sync_gdrive_data(
+            user_id=user.user_id,
+            folder_id=folder_id,
+            recursive=recursive,
+            max_depth=max_depth,
+        )
+        finished_at = datetime.now(timezone.utc).isoformat()
+        config = {
+            "recursive": recursive,
+            "max_depth": max_depth,
+            "folder_id": folder_id,
+            "started_at": started_at,
+            "finished_at": finished_at,
+            "stats": result.get("stats"),
+            "error": result.get("error"),
+        }
+        await sb.from_("data_sources").update({
+            "status": "connected" if result.get("success") else "error",
+            "last_sync": finished_at,
+            "config": config,
+        }).eq("source_id", source_id).execute()
+        if result.get("success"):
+            await log_activity(
+                user.user_id, "gdrive_sync",
+                f"Synced Google Drive (recursive={recursive}, depth={max_depth}): {result.get('stats')}",
+            )
+        return result
+
+    if wait:
+        result = await run_sync()
+        return result
+
+    # Fire-and-forget background task
+    import asyncio
+    asyncio.create_task(run_sync())
+    return {
+        "success": True,
+        "status": "started",
+        "message": "Sync running in background. Poll GET /api/data-sources to see progress.",
+        "started_at": started_at,
+        "config": {"recursive": recursive, "max_depth": max_depth, "folder_id": folder_id},
+    }
 
 
 # ======================= NEO4J =======================

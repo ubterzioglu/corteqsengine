@@ -84,6 +84,15 @@ Databases
 - ✅ 35/35 backend regression tests passed (iteration_5.json)
 - ✅ Health endpoint reports `database=supabase`, `version=2.1.0`
 
+**Date: 2026-02-09 (v2.2) — Google Drive Recursive Sync**
+- ✅ `data_sync_service.sync_gdrive_data` now traverses subfolders recursively (configurable `max_depth`, default 5)
+- ✅ Creates `CONTAINED_IN` Neo4j relationships between files and parent folders
+- ✅ Endpoint `POST /api/integrations/gdrive/sync` runs as background task by default to bypass 60s ingress timeout (use `?wait=true` to block until done)
+- ✅ Sync state + stats persisted to `data_sources.config` so frontend can poll `GET /api/data-sources` for progress
+- ✅ Status transitions: `syncing` → `connected` (or `error`) with finished_at timestamp
+- ✅ Live test: 195 files + 85 folders synced at depth=2 (vs 57+43 at root only)
+- ✅ Neo4j: 204 total nodes (10 projects, 144 documents, 7 persons, 43 topics)
+
 ## Prioritized Backlog
 
 ### P0 - Critical (Next Sprint)
@@ -95,7 +104,7 @@ Databases
 - [x] Migrate MongoDB → Supabase
 
 ### P1 - High Priority
-- [ ] Recursive sync for Google Drive subfolders
+- [x] Recursive sync for Google Drive subfolders
 - [ ] Sync Slack channel messages (needs channels:history scope)
 - [ ] Real-time webhooks for Slack/GitHub
 - [ ] Advanced graph algorithms (PageRank)
